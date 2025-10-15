@@ -1,13 +1,30 @@
 'use client';
 
-import { Map, Marker } from 'react-map-gl/maplibre';
+import { useEffect, useState, useMemo } from 'react';
+import { Map, Marker, Popup } from 'react-map-gl/maplibre';
 
 export default function HomePage() {
+  const [locations, setLocations] = useState([]); // APIからのデータ
+  const [popupInfo, setPopupInfo] = useState<any | null>(null);
+
+  // デフォルト表示（東京）
   const initialView = {
-    longitude: 139.6917, // 東京
+    longitude: 139.6917,
     latitude: 35.6895,
     zoom: 10,
   };
+
+  // API Routeからデータ取得
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch('/api/locations');
+      const data = await res.json();
+      setLocations(data);
+    };
+    fetchData();
+  }, []);
+
+  console.log(locations);
 
   return (
     <main style={{ width: '100%', height: '100vh' }}>
@@ -15,9 +32,7 @@ export default function HomePage() {
         initialViewState={initialView}
         mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
         style={{ width: '100%', height: '100%' }}
-      >
-        <Marker longitude={139.6917} latitude={35.6895} />
-      </Map>
+      ></Map>
     </main>
   );
 }
