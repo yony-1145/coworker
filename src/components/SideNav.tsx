@@ -1,13 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { Home, User, Search, LogOut } from 'lucide-react';
+import { Map, User, Search, MapPinPlus, LogOut } from 'lucide-react';
 
 const navItems = [
-  { href: '/home', label: 'Home', icon: <Home size={18} /> },
-  { href: '/search', label: 'search', icon: <Search size={18} /> },
-  { href: '/user', label: 'User', icon: <User size={18} /> },
-  { href: '/logOut', label: 'LogOut', icon: <LogOut size={18} /> },
+  { href: '/map', label: 'マップ', icon: <Map size={18} /> },
+  { href: '/Search', label: '検索', icon: <Search size={18} /> },
+  { href: '/Post', label: '投稿', icon: <MapPinPlus size={18} /> },
+  { href: '/User', label: 'ユーザー', icon: <User size={18} /> },
+  { href: '/LogOut', label: 'ログアウト', icon: <LogOut size={18} /> },
 ];
 
 export default function SideNav() {
