@@ -4,9 +4,9 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { Map, Marker, Popup } from 'react-map-gl/maplibre';
 import UserPin from '@/components/UserPin';
 import UserPopup from '@/components/UserPopup';
-import { useMyLocation } from '@/hooks/useMylocations';
+import { useMyLocation } from '@/hooks/useMyLocation';
 
-export default function HomePage() {
+export default function MapPage() {
   const [locations, setLocations] = useState([]);
   const [myUser, setMyUser] = useState<any | null>(null);
   const [popupInfo, setPopupInfo] = useState<any | null>(null);
@@ -14,7 +14,7 @@ export default function HomePage() {
 
   const currentUserEmail = 'yone@example.com';
 
-  const { myLocation, setMapLoaded } = useMyLocation(mapRef, currentUserEmail); // ✅ 追加
+  const { myLocation, setMapLoaded } = useMyLocation(mapRef, currentUserEmail);
 
   const initialView = {
     longitude: 139.6917,

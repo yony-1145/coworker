@@ -5,10 +5,10 @@ import { Map, User, Search, MapPinPlus, LogOut } from 'lucide-react';
 
 const navItems = [
   { href: '/map', label: 'マップ', icon: <Map size={18} /> },
-  { href: '/Search', label: '検索', icon: <Search size={18} /> },
-  { href: '/Post', label: '投稿', icon: <MapPinPlus size={18} /> },
-  { href: '/User', label: 'ユーザー', icon: <User size={18} /> },
-  { href: '/LogOut', label: 'ログアウト', icon: <LogOut size={18} /> },
+  { href: '/search', label: '検索', icon: <Search size={18} /> },
+  { href: '/post', label: '投稿', icon: <MapPinPlus size={18} /> },
+  { href: '/user', label: 'ユーザー', icon: <User size={18} /> },
+  { href: '/logOut', label: 'ログアウト', icon: <LogOut size={18} /> },
 ];
 
 export default function SideNav() {
