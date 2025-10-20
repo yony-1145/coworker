@@ -9,7 +9,7 @@ const navItems = [
   { href: '/post', label: '投稿', icon: <MapPinPlus size={18} /> },
   { href: '/user', label: 'ユーザー', icon: <User size={18} /> },
   { href: '/logOut', label: 'ログアウト', icon: <LogOut size={18} /> },
-];
+];    
 
 export default function SideNav() {
   return (
