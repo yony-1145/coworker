@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import SideNav from '@/components/SideNav';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -24,11 +25,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
+    <html lang="ja">
+      <body>
+        <div className="flex min-h-screen">
+          <SideNav />
+          <main className="flex-1 p-6 overflow-hidden">{children}</main>
+        </div>
       </body>
     </html>
   );
