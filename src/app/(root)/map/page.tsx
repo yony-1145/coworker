@@ -8,7 +8,7 @@ import SpotPin from '@/components/SpotPin';
 import SpotPopup from '@/components/SpotPopup';
 import { useMyLocation } from '@/hooks/useMyLocation';
 
-export default function HomePage() {
+export default function MapPage() {
   const [locations, setLocations] = useState([]); // 他ユーザーの位置
   const [spots, setSpots] = useState([]); // 投稿されたスポット
   const [popupInfo, setPopupInfo] = useState<any | null>(null);
