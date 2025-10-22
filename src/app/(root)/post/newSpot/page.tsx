@@ -1,0 +1,140 @@
+'use client';
+
+import { useState, useRef } from 'react';
+import { Map, Marker } from 'react-map-gl/maplibre';
+import { useRouter } from 'next/navigation';
+
+export default function PostStep1() {
+  const router = useRouter();
+  const mapRef = useRef<any>(null);
+
+  const [title, setTitle] = useState('');
+  const [address, setAddress] = useState('');
+  const [coords, setCoords] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [candidates, setCandidates] = useState<
+    { name: string; latitude: number; longitude: number }[]
+  >([]);
+
+  // --- geocode API ---
+  const handleGeocode = async () => {
+    const res = await fetch('/api/geocode', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address }),
+    });
+    const data = await res.json();
+    setCandidates(data.results || []);
+  };
+
+  // --- 候補選択 ---
+  const selectCandidate = (lat: number, lon: number, name: string) => {
+    setCoords({ latitude: lat, longitude: lon });
+    setAddress(name);
+    setCandidates([]);
+    mapRef.current?.flyTo({ center: [lon, lat], zoom: 14, duration: 1200 });
+  };
+
+  // --- 詳細登録へ遷移 ---
+  const handleNext = () => {
+    if (!coords || !title) {
+      alert('タイトルと位置を入力してください');
+      return;
+    }
+    router.push(
+      `/post/new/details?title=${encodeURIComponent(title)}&lat=${coords.latitude}&lon=${coords.longitude}`
+    );
+  };
+
+  return (
+    <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-lg p-6 space-y-5">
+        <h1 className="text-xl font-semibold text-gray-800">スポットを追加</h1>
+
+        {/* タイトル */}
+        <div>
+          <label className="block text-sm text-gray-700 mb-1">タイトル</label>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="例：スターバックス博多"
+            className="w-full border rounded-lg px-3 py-2"
+          />
+        </div>
+
+        {/* 住所 */}
+        <div>
+          <label className="block text-sm text-gray-700 mb-1">
+            住所または地名
+          </label>
+          <div className="flex space-x-2">
+            <input
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="例：博多駅 スターバックス"
+              className="flex-1 border rounded-lg px-3 py-2"
+            />
+            <button
+              type="button"
+              onClick={handleGeocode}
+              className="bg-blue-600 text-white px-4 rounded-lg hover:bg-blue-700"
+            >
+              検索
+            </button>
+          </div>
+
+          {/* 候補リスト */}
+          {candidates.length > 0 && (
+            <ul className="mt-2 border rounded-md divide-y">
+              {candidates.map((c, i) => (
+                <li
+                  key={i}
+                  onClick={() =>
+                    selectCandidate(c.latitude, c.longitude, c.name)
+                  }
+                  className="p-2 text-sm hover:bg-blue-50 cursor-pointer"
+                >
+                  {c.name}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* 地図プレビュー */}
+        <div className="rounded-lg overflow-hidden border border-gray-200">
+          <Map
+            ref={mapRef}
+            initialViewState={{
+              longitude: 135.5,
+              latitude: 34.7,
+              zoom: 5,
+            }}
+            style={{ width: '100%', height: 250 }}
+            mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+            onClick={(e) =>
+              setCoords({ latitude: e.lngLat.lat, longitude: e.lngLat.lng })
+            }
+          >
+            {coords && (
+              <Marker
+                longitude={coords.longitude}
+                latitude={coords.latitude}
+                color="red"
+              />
+            )}
+          </Map>
+        </div>
+
+        <button
+          onClick={handleNext}
+          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold py-2 rounded-lg hover:opacity-90 transition"
+        >
+          次へ
+        </button>
+      </div>
+    </main>
+  );
+}

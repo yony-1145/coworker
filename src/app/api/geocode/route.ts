@@ -1,37 +1,35 @@
 import { NextResponse } from 'next/server';
 
-// 住所 → 緯度経度 変換API
 export async function POST(req: Request) {
   const { address } = await req.json();
-
   if (!address) {
     return NextResponse.json({ error: '住所が未入力です。' }, { status: 400 });
   }
 
-  // OpenStreetMap Nominatim API
   const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
     address
   )}`;
 
   const res = await fetch(url, {
     headers: {
-      'User-Agent': 'CoworkerApp/1.0 (contact@example.com)', // 識別ヘッダ（必須）
+      'User-Agent': 'CoworkerApp/1.0 (contact@example.com)', // 必須（識別用）
     },
   });
 
   const data = await res.json();
-
   if (!data.length) {
     return NextResponse.json(
-      { error: '住所から位置を取得できませんでした。' },
+      { error: '住所から位置を取得できません。' },
       { status: 404 }
     );
   }
 
-  const { lat, lon } = data[0];
+  // 複数候補を返却
+  const results = data.map((item: any) => ({
+    name: item.display_name,
+    latitude: parseFloat(item.lat),
+    longitude: parseFloat(item.lon),
+  }));
 
-  return NextResponse.json({
-    latitude: parseFloat(lat),
-    longitude: parseFloat(lon),
-  });
+  return NextResponse.json({ results });
 }

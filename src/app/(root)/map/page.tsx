@@ -18,8 +18,8 @@ export default function MapPage() {
   const { myLocation, setMapLoaded } = useMyLocation(mapRef, currentUserEmail);
 
   const initialView = {
-    longitude: 139.6917,
-    latitude: 35.6895,
+    longitude: 130.6917,
+    latitude: 33.6917,
     zoom: 10,
   };
 
@@ -50,6 +50,7 @@ export default function MapPage() {
   const userPins = useMemo(
     () =>
       locations.map((loc: any, i: number) => {
+        // 選択中かどうか判定
         const isSelected =
           popupInfo?.id === loc.id && popupInfo?.type === 'user';
         return (
@@ -72,6 +73,7 @@ export default function MapPage() {
   const spotPins = useMemo(
     () =>
       spots.map((spot: any, i: number) => {
+        // 選択中かどうか判定
         const isSelected =
           popupInfo?.id === spot.id && popupInfo?.type === 'spot';
         return (
