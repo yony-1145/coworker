@@ -7,41 +7,54 @@ export default function PostPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [address, setAddress] = useState('');
-  const [tags, setTags] = useState('');
-  const [image, setImage] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [candidates, setCandidates] = useState<
+    { name: string; latitude: number; longitude: number }[]
+  >([]);
   const [coords, setCoords] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [tags, setTags] = useState('');
+  const [image, setImage] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const mapRef = useRef<any>(null);
 
-  // --- geocode API呼び出し ---
+  // --- geocode API呼び出し（複数候補） ---
   const geocodeAddress = async (address: string) => {
     const res = await fetch('/api/geocode', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ address }),
     });
-    if (!res.ok) return null;
-    return await res.json();
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.results || [];
   };
 
-  // --- 住所検索ボタン ---
+  // --- 検索ボタン ---
   const handleGeocode = async () => {
     if (!address) return;
-    const result = await geocodeAddress(address);
-    if (result) {
-      setCoords(result);
-      mapRef.current?.flyTo({
-        center: [result.longitude, result.latitude],
-        zoom: 14,
-        duration: 1500,
-      });
-    } else {
-      alert('住所から位置を取得できませんでした。');
+    const results = await geocodeAddress(address);
+    if (results.length === 0) {
+      alert('該当する場所が見つかりませんでした。');
+      return;
     }
+    setCandidates(results);
+  };
+
+  // --- 候補選択 ---
+  const handleSelectCandidate = (lat: number, lon: number, name: string) => {
+    setCoords({ latitude: lat, longitude: lon });
+    setAddress(name); // 選択した候補名を住所欄に反映
+    setCandidates([]); // 候補リストを閉じる
+
+    // 地図を移動
+    mapRef.current?.flyTo({
+      center: [lon, lat],
+      zoom: 14,
+      duration: 1500,
+    });
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,13 +69,13 @@ export default function PostPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!coords) {
-      alert('位置が確定していません。住所を検索して確認してください。');
+      alert('位置が確定していません。住所を検索して選択してください。');
       return;
     }
 
     setIsSubmitting(true);
 
-    // 画像をBase64に変換（仮）
+    // 画像 → Base64（Cloudinary導入予定）
     let imageBase64: string | null = null;
     if (image) {
       const reader = new FileReader();
@@ -73,6 +86,7 @@ export default function PostPage() {
       imageBase64 = await base64Promise;
     }
 
+    // タグ配列化
     const tagList = tags
       .split(',')
       .map((t) => t.trim())
@@ -131,21 +145,7 @@ export default function PostPage() {
             />
           </div>
 
-          {/* 説明 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              説明
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Wi-Fi・電源あり / 落ち着いた雰囲気"
-              rows={3}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            />
-          </div>
-
-          {/* 住所 + 検索 */}
+          {/* 住所検索 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               住所
@@ -155,7 +155,7 @@ export default function PostPage() {
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="例：福岡市博多区博多駅前2丁目"
+                placeholder="例：博多駅 スターバックス"
                 className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
               <button
@@ -166,9 +166,26 @@ export default function PostPage() {
                 検索
               </button>
             </div>
+
+            {/* 候補リスト */}
+            {candidates.length > 0 && (
+              <ul className="mt-3 border border-gray-200 rounded-lg shadow-sm divide-y divide-gray-100 bg-white">
+                {candidates.map((c, i) => (
+                  <li
+                    key={i}
+                    onClick={() =>
+                      handleSelectCandidate(c.latitude, c.longitude, c.name)
+                    }
+                    className="p-2 cursor-pointer hover:bg-blue-50 transition"
+                  >
+                    <p className="text-sm text-gray-700">{c.name}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
 
-          {/* ミニマップ */}
+          {/* 地図プレビュー */}
           <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm">
             <Map
               ref={mapRef}
@@ -194,6 +211,20 @@ export default function PostPage() {
                 />
               )}
             </Map>
+          </div>
+
+          {/* 説明 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              説明
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Wi-Fi・電源あり / 落ち着いた雰囲気"
+              rows={3}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            />
           </div>
 
           {/* タグ */}
