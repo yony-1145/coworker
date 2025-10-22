@@ -1,19 +1,20 @@
 'use client';
 
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { Map, Marker, Popup } from 'react-map-gl/maplibre';
+import { Map } from 'react-map-gl/maplibre';
 import UserPin from '@/components/UserPin';
 import UserPopup from '@/components/UserPopup';
+import SpotPin from '@/components/SpotPin';
+import SpotPopup from '@/components/SpotPopup';
 import { useMyLocation } from '@/hooks/useMyLocation';
 
-export default function MapPage() {
-  const [locations, setLocations] = useState([]);
-  const [myUser, setMyUser] = useState<any | null>(null);
+export default function HomePage() {
+  const [locations, setLocations] = useState([]); // 他ユーザーの位置
+  const [spots, setSpots] = useState([]); // 投稿されたスポット
   const [popupInfo, setPopupInfo] = useState<any | null>(null);
   const mapRef = useRef<any>(null);
 
   const currentUserEmail = 'yone@example.com';
-
   const { myLocation, setMapLoaded } = useMyLocation(mapRef, currentUserEmail);
 
   const initialView = {
@@ -22,9 +23,9 @@ export default function MapPage() {
     zoom: 10,
   };
 
-  // 他ユーザーの位置情報を取得
+  // --- 他ユーザーの位置を取得 ---
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchLocations = async () => {
       const res = await fetch('/api/locations', { cache: 'no-store' });
       const data = await res.json();
       const others = data.filter(
@@ -32,26 +33,58 @@ export default function MapPage() {
       );
       setLocations(others);
     };
-    fetchData();
+    fetchLocations();
   }, []);
 
-  // MarkerをuseMemoで生成
-  const pins = useMemo(
+  // --- スポット一覧を取得 ---
+  useEffect(() => {
+    const fetchSpots = async () => {
+      const res = await fetch('/api/spots', { cache: 'no-store' });
+      const data = await res.json();
+      setSpots(data);
+    };
+    fetchSpots();
+  }, []);
+
+  // --- ユーザー用ピン ---
+  const userPins = useMemo(
     () =>
       locations.map((loc: any, i: number) => {
-        const isSelected = popupInfo?.id === loc.id;
+        const isSelected =
+          popupInfo?.id === loc.id && popupInfo?.type === 'user';
         return (
           <UserPin
-            key={i}
+            key={`user-${i}`}
             user={loc.user}
             lat={loc.lat}
             lng={loc.lng}
             showName={!isSelected}
-            onClick={() => setPopupInfo(isSelected ? null : loc)}
+            onClick={() =>
+              setPopupInfo(isSelected ? null : { ...loc, type: 'user' })
+            }
           />
         );
       }),
     [locations, popupInfo]
+  );
+
+  // --- スポット用ピン ---
+  const spotPins = useMemo(
+    () =>
+      spots.map((spot: any, i: number) => {
+        const isSelected =
+          popupInfo?.id === spot.id && popupInfo?.type === 'spot';
+        return (
+          <SpotPin
+            key={`spot-${i}`}
+            spot={spot}
+            onClick={() =>
+              setPopupInfo(isSelected ? null : { ...spot, type: 'spot' })
+            }
+          />
+        );
+      }),
+    [spots, popupInfo]
   );
 
   return (
@@ -63,14 +96,14 @@ export default function MapPage() {
         mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
         className="w-full h-full"
       >
-        {pins}
+        {/* ユーザーのピン */}
+        {userPins}
 
-        {/* 自分の現在地 */}
-        {myLocation && myUser && (
-          <UserPin user={myUser} lat={myLocation.lat} lng={myLocation.lng} />
-        )}
+        {/* スポットのピン */}
+        {spotPins}
 
-        {popupInfo && (
+        {/* 選択中ポップアップ */}
+        {popupInfo?.type === 'user' && (
           <UserPopup
             user={popupInfo.user}
             lat={popupInfo.lat}
@@ -78,6 +111,9 @@ export default function MapPage() {
             message={popupInfo.message}
             onClose={() => setPopupInfo(null)}
           />
+        )}
+        {popupInfo?.type === 'spot' && (
+          <SpotPopup spot={popupInfo} onClose={() => setPopupInfo(null)} />
         )}
       </Map>
     </main>
