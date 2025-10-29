@@ -2,10 +2,8 @@
 
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { Map } from 'react-map-gl/maplibre';
-import UserPin from '@/components/UserPin';
-import UserPopup from '@/components/UserPopup';
-import SpotPin from '@/components/SpotPin';
-import SpotPopup from '@/components/SpotPopup';
+import Pin from '@/components/Pin'; // Pin を共通化
+import Popup from '@/components/Popup'; // Popup を共通化
 import { useMyLocation } from '@/hooks/useMyLocation';
 
 export default function MapPage() {
@@ -15,7 +13,7 @@ export default function MapPage() {
   const mapRef = useRef<any>(null);
 
   const currentUserEmail = 'yone@example.com';
-  const { myLocation, setMapLoaded } = useMyLocation(mapRef, currentUserEmail);
+  const { myLocation, setMapLoaded } = useMyLocation(mapRef, currentUserEmail); // 位置情報を取得
 
   const initialView = {
     longitude: 130.6917,
@@ -46,51 +44,48 @@ export default function MapPage() {
     fetchSpots();
   }, []);
 
-  // --- ユーザー用ピン ---
-  const userPins = useMemo(
-    () =>
-      locations.map((loc: any, i: number) => {
-        // 選択中かどうか判定
-        const isSelected =
-          popupInfo?.id === loc.id && popupInfo?.type === 'user';
-        return (
-          <UserPin
-            key={`user-${i}`}
-            user={loc.user}
-            lat={loc.lat}
-            lng={loc.lng}
-            showName={!isSelected}
-            onClick={() =>
-              setPopupInfo(isSelected ? null : { ...loc, type: 'user' })
-            }
-          />
-        );
-      }),
-    [locations, popupInfo]
-  );
+  // --- ユーザーとスポットのピンを描画 ---
+  const pins = useMemo(() => {
+    const userPins = locations.map((loc: any) => {
+      const isSelected = popupInfo?.id === loc.id && popupInfo?.type === 'user';
+      return (
+        <Pin
+          key={`user-${loc.id}`}
+          type="user" // 共通Pinにtypeを指定
+          item={loc.user}
+          lat={loc.lat}
+          lng={loc.lng}
+          showName={!isSelected}
+          onClick={() =>
+            setPopupInfo(isSelected ? null : { ...loc, type: 'user' })
+          }
+        />
+      );
+    });
 
-  // --- スポット用ピン ---
-  const spotPins = useMemo(
-    () =>
-      spots.map((spot: any, i: number) => {
-        // 選択中かどうか判定
-        const isSelected =
-          popupInfo?.id === spot.id && popupInfo?.type === 'spot';
-        return (
-          <SpotPin
-            key={`spot-${i}`}
-            spot={spot}
-            onClick={() =>
-              setPopupInfo(isSelected ? null : { ...spot, type: 'spot' })
-            }
-          />
-        );
-      }),
-    [spots, popupInfo]
-  );
+    const spotPins = spots.map((spot: any) => {
+      const isSelected =
+        popupInfo?.id === spot.id && popupInfo?.type === 'spot';
+      return (
+        <Pin
+          key={`spot-${spot.id}`}
+          type="spot" // Spot用Pin
+          item={spot}
+          lat={spot.latitude}
+          lng={spot.longitude}
+          showName={!isSelected}
+          onClick={() =>
+            setPopupInfo(isSelected ? null : { ...spot, type: 'spot' })
+          }
+        />
+      );
+    });
+
+    return [...userPins, ...spotPins];
+  }, [locations, spots, popupInfo]);
 
   return (
-    <main className="w-full h-screen">
+    <>
       <Map
         ref={mapRef}
         initialViewState={initialView}
@@ -98,26 +93,21 @@ export default function MapPage() {
         mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
         className="w-full h-full"
       >
-        {/* ユーザーのピン */}
-        {userPins}
+        {/* すべてのピンをまとめて描画 */}
+        {pins}
 
-        {/* スポットのピン */}
-        {spotPins}
-
-        {/* 選択中ポップアップ */}
-        {popupInfo?.type === 'user' && (
-          <UserPopup
-            user={popupInfo.user}
-            lat={popupInfo.lat}
-            lng={popupInfo.lng}
-            message={popupInfo.message}
+        {/* Popupに統一 */}
+        {popupInfo && (
+          <Popup
+            type={popupInfo.type}
+            item={popupInfo.type === 'user' ? popupInfo.user : popupInfo}
+            lat={popupInfo.lat ?? popupInfo.latitude}
+            lng={popupInfo.lng ?? popupInfo.longitude}
+            message={popupInfo.message ?? popupInfo.description}
             onClose={() => setPopupInfo(null)}
           />
         )}
-        {popupInfo?.type === 'spot' && (
-          <SpotPopup spot={popupInfo} onClose={() => setPopupInfo(null)} />
-        )}
       </Map>
-    </main>
+    </>
   );
 }
