@@ -71,3 +71,20 @@ model SpotRating {
   score     Int
   createdAt DateTime @default(now())
 }
+
+model UserProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  displayName  String              // 公開名・ニックネーム
+  iconUrl      String?             // プロフィールアイコン画像
+  headline     String?             // キャッチコピー
+  occupation   String?             // 職業・活動形態（自由入力）
+  affiliation  String?             // 所属（任意）
+  location     String?             // 居住地（任意）
+  age          Int?
+  links        Json?               // SNSリンク（配列）
+  tags         Json?               // 興味・活動領域タグ
+  bioText      String?             // 自己紹介・フリースペース
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
