@@ -6,10 +6,17 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // params.id を使ってスポット情報を取得
     const spot = await prisma.spot.findUnique({
       where: { id: params.id },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        imageUrls: true,
+        latitude: true,
+        longitude: true,
+        createdAt: true,
+        updatedAt: true,
         user: {
           select: { id: true, name: true, image: true },
         },
@@ -37,7 +44,6 @@ export async function GET(
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
 
-    // 平均スコアを算出（小数1桁）
     const avgRating =
       spot.ratings.length > 0
         ? Number(

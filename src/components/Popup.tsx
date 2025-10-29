@@ -24,7 +24,10 @@ export default function Popup({
     type === 'user'
       ? (item?.image ?? '/user-icons/default.png')
       : (item?.image ?? '/spot-icons/default.png');
-  const href = type === 'user' ? `/users/${item?.id}` : `/spots/${item?.id}`;
+  const href =
+    type === 'user'
+      ? `/users/${item?.id}`
+      : `/spots/${item.id}?lat=${item.latitude}&lng=${item.longitude}`;
 
   return (
     <MapPopup

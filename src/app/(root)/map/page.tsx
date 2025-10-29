@@ -91,7 +91,6 @@ export default function MapPage() {
         initialViewState={initialView}
         onLoad={() => setMapLoaded(true)}
         mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-        className="w-full h-full"
       >
         {/* すべてのピンをまとめて描画 */}
         {pins}
