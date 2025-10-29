@@ -84,6 +84,25 @@ export default function MapPage() {
     return [...userPins, ...spotPins];
   }, [locations, spots, popupInfo]);
 
+  // --- スポット用ピン ---
+  const spotPins = useMemo(
+    () =>
+      spots.map((spot: any, i: number) => {
+        const isSelected =
+          popupInfo?.id === spot.id && popupInfo?.type === 'spot';
+        return (
+          <SpotPin
+            key={`spot-${i}`}
+            spot={spot}
+            onClick={() =>
+              setPopupInfo(isSelected ? null : { ...spot, type: 'spot' })
+            }
+          />
+        );
+      }),
+    [spots, popupInfo]
+  );
+
   return (
     <>
       <Map
@@ -105,6 +124,9 @@ export default function MapPage() {
             message={popupInfo.message ?? popupInfo.description}
             onClose={() => setPopupInfo(null)}
           />
+        )}
+        {popupInfo?.type === 'spot' && (
+          <SpotPopup spot={popupInfo} onClose={() => setPopupInfo(null)} />
         )}
       </Map>
     </>
