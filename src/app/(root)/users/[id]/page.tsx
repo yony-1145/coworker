@@ -1,4 +1,7 @@
+import Link from 'next/link';
 import { Github, FileText, LucideX } from 'lucide-react';
+// import { getServerSession } from 'next-auth'
+// import { authOptions } from '@/lib/auth'
 
 interface UserProfile {
   id: string;
@@ -19,14 +22,14 @@ export default async function UserProfilePage({
 }: {
   params: { id: string };
 }) {
-  // --- ユーザープロフィールを取得 ---
+  // const session = await getServerSession(authOptions)
+  // const isOwner = session?.user?.id === params.id
+  const isOwner = true; // ← 今は仮で常に編集ボタンを表示
+
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${params.id}`,
-    {
-      cache: 'no-store',
-    }
+    { cache: 'no-store' }
   );
-
   if (!res.ok) {
     return (
       <div className="text-center py-20 text-gray-500">
@@ -57,11 +60,22 @@ export default async function UserProfilePage({
             <h1 className="text-3xl font-semibold text-gray-900">
               {profile.displayName}
             </h1>
-            <p className="text-sm text-gray-400 mt-1">
+            <p className="text-sm text-gray-400 mt-2">
               {profile.location && `${profile.location} / `}
               {profile.age && `${profile.age}歳`}
             </p>
           </div>
+          {/* 編集ボタン（自分のページのみ表示） */}
+          {isOwner && (
+            <div className="ml-auto">
+              <Link
+                href={`/users/${params.id}/edit`}
+                className="inline-block px-5 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"
+              >
+                プロフィールを編集
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* headline */}
