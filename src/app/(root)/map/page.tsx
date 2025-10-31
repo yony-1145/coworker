@@ -91,7 +91,7 @@ export default function MapPage() {
         const isSelected =
           popupInfo?.id === spot.id && popupInfo?.type === 'spot';
         return (
-          <SpotPin
+          <Pin
             key={`spot-${i}`}
             spot={spot}
             onClick={() =>
@@ -126,7 +126,7 @@ export default function MapPage() {
           />
         )}
         {popupInfo?.type === 'spot' && (
-          <SpotPopup spot={popupInfo} onClose={() => setPopupInfo(null)} />
+          <Popup spot={popupInfo} onClose={() => setPopupInfo(null)} />
         )}
       </Map>
     </>

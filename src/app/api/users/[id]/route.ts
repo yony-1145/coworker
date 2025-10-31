@@ -1,31 +1,63 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+// import { getServerSession } from 'next-auth';
+// import { authOptions } from '@/lib/auth';
 
-// /api/users/[id] → ユーザー情報＋最新の位置を返す
+// 公開プロフィールの取得
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params; // Promiseをawait
+    const { id } = await context.params;
 
-    const user = await prisma.user.findUnique({
-      where: { id },
-      include: {
-        location: true,
+    const profile = await prisma.userProfile.findUnique({
+      where: { userId: id },
+    });
+
+    if (!profile) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(profile);
+  } catch (error) {
+    console.error('GET /api/users/[id] Error:', error);
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+}
+
+// プロフィールの更新
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+
+    const body = await req.json();
+
+    const cleanData = Object.fromEntries(
+      Object.entries(body).filter(([_, v]) => v !== undefined)
+    );
+
+    const updated = await prisma.userProfile.upsert({
+      where: { userId: id },
+      update: cleanData,
+      create: {
+        userId: id,
+        ...cleanData,
       },
     });
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'ユーザーが見つかりません' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(user);
-  } catch (err) {
-    console.error('GET /api/users/[id] error:', err);
-    return NextResponse.json({ error: 'サーバーエラー' }, { status: 500 });
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error('PUT /api/users/[id] Error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }
