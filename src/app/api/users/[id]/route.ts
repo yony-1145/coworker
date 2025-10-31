@@ -6,93 +6,58 @@ import { prisma } from '@/lib/prisma';
 // 公開プロフィールの取得
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await context.params;
 
     const profile = await prisma.userProfile.findUnique({
       where: { userId: id },
-      select: {
-        displayName: true,
-        iconUrl: true,
-        headline: true,
-        occupation: true,
-        affiliation: true,
-        location: true,
-        age: true,
-        links: true,
-        tags: true,
-        bioText: true,
-        createdAt: true,
-        updatedAt: true,
-      },
     });
 
     if (!profile) {
-      return NextResponse.json(
-        { error: 'ユーザーが見つかりません' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     return NextResponse.json(profile);
-  } catch (err) {
-    console.error('GET /api/users/[id] error:', err);
-    return NextResponse.json({ error: 'サーバーエラー' }, { status: 500 });
+  } catch (error) {
+    console.error('GET /api/users/[id] Error:', error);
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }
 
 // プロフィールの更新
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    const { id } = params;
-
-    if (!session?.user?.id || session.user.id !== id) {
-      return NextResponse.json({ error: '権限がありません' }, { status: 403 });
-    }
+    const { id } = await context.params;
 
     const body = await req.json();
 
+    const cleanData = Object.fromEntries(
+      Object.entries(body).filter(([_, v]) => v !== undefined)
+    );
+
     const updated = await prisma.userProfile.upsert({
       where: { userId: id },
-      update: {
-        displayName: body.displayName,
-        iconUrl: body.iconUrl,
-        headline: body.headline,
-        occupation: body.occupation,
-        affiliation: body.affiliation,
-        location: body.location,
-        age: body.age,
-        links: body.links,
-        tags: body.tags,
-        bioText: body.bioText,
-      },
+      update: cleanData,
       create: {
         userId: id,
-        displayName: body.displayName,
-        iconUrl: body.iconUrl,
-        headline: body.headline,
-        occupation: body.occupation,
-        affiliation: body.affiliation,
-        location: body.location,
-        age: body.age,
-        links: body.links,
-        tags: body.tags,
-        bioText: body.bioText,
+        ...cleanData,
       },
     });
 
-    return NextResponse.json({
-      message: 'プロフィールを更新しました',
-      profile: updated,
-    });
-  } catch (err) {
-    console.error('PUT /api/users/[id] error:', err);
-    return NextResponse.json({ error: 'サーバーエラー' }, { status: 500 });
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error('PUT /api/users/[id] Error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }

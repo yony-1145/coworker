@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, ChangeEvent, FormEvent } from 'react';
+import { useEffect, useState, ChangeEvent, FormEvent, use } from 'react';
 
 interface UserProfile {
   id: string;
@@ -17,22 +17,23 @@ interface UserProfile {
 export default function UserProfileEditPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = use(params);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const res = await fetch(`/api/users/${params.id}`, { cache: 'no-store' });
+      const res = await fetch(`/api/users/${id}`, { cache: 'no-store' });
       const data = await res.json();
       setProfile(data);
       setPreview(data.iconUrl || null);
       setLoading(false);
     };
     fetchProfile();
-  }, [params.id]);
+  }, [id]);
 
   if (loading)
     return <p className="text-center mt-20 text-gray-500">読み込み中...</p>;
@@ -50,9 +51,26 @@ export default function UserProfileEditPage({
     setProfile((prev) => (prev ? { ...prev, [name]: value } : prev));
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log('送信データ:', profile);
+    if (!profile) return;
+
+    try {
+      const res = await fetch(`/api/users/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profile),
+      });
+
+      if (!res.ok) {
+        throw new Error(`更新に失敗しました (${res.status})`);
+      }
+
+      alert('プロフィールを保存しました');
+    } catch (err) {
+      console.error(err);
+      alert('エラーが発生しました。もう一度お試しください。');
+    }
   };
 
   return (
@@ -81,7 +99,7 @@ export default function UserProfileEditPage({
           <div className="flex items-center gap-6">
             <div className="relative w-24 h-24">
               <img
-                src={preview || '/images/sample-icon.png'}
+                src={preview || '/user-icons/cat5.png'}
                 alt={profile.displayName}
                 className="w-24 h-24 rounded-full shadow-md border-4 border-white object-cover"
               />
