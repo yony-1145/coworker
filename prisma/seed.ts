@@ -3,7 +3,7 @@ import { prisma } from '../src/lib/prisma';
 async function main() {
   await prisma.userProfile.create({
     data: {
-      userId: '既存のUserテーブルのid',
+      userId: 'cmhm5bc6x00019oq40rbmkjle',
       displayName: '山田たろう',
       iconUrl: '/images/sample-icon.png',
       headline: '地方からWeb開発を発信しています',
