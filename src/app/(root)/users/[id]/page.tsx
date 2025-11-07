@@ -1,3 +1,4 @@
+import { baseApiUrl } from 'mapbox-gl';
 import Link from 'next/link';
 
 interface UserProfile {
@@ -13,22 +14,22 @@ interface UserProfile {
   bioText?: string;
   tags?: string[];
 }
-
 export default async function UserProfilePage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = await params; // ← await
-
+  const { id } = params;
   const isOwner = true; // 後でNextAuth制御に置換
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/users/${id}`,
-    { cache: 'no-store' }
-  );
+  // 相対パスでfetch
+  const res = await fetch(`${baseUrl}/api/users/${id}`, {
+    cache: 'no-store',
+  });
 
   if (!res.ok) {
+    console.error('Failed to fetch user:', res.status, res.statusText);
     return (
       <div className="text-center py-20 text-gray-500">
         ユーザーが見つかりません。
@@ -37,8 +38,6 @@ export default async function UserProfilePage({
   }
 
   const profile: UserProfile = await res.json();
-
-  console.log(profile.links);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12">
@@ -60,7 +59,6 @@ export default async function UserProfilePage({
                 </h1>
               </div>
 
-              {/* 編集ボタン（自分のページのみ表示） */}
               {isOwner && (
                 <Link
                   href={`/users/${id}/edit`}
@@ -104,16 +102,16 @@ export default async function UserProfilePage({
           <section className="border-t pt-4 space-y-3">
             <h2 className="text-xl font-semibold text-gray-900">SNSリンク</h2>
             <div className="flex flex-col gap-3 mt-3">
-              {Object.values(profile.links).map((url, i) => (
+              {profile.links.map((link, i) => (
                 <a
                   key={i}
-                  href={url}
+                  href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center justify-between rounded-xl border border-gray-200 bg-gradient-to-r from-gray-50 to-white px-5 py-3 shadow-sm hover:from-indigo-50 hover:border-indigo-300 transition-all duration-200"
                 >
                   <span className="text-gray-700 group-hover:text-indigo-700 font-medium truncate">
-                    {url}
+                    {link.label}
                   </span>
                   <span className="text-gray-400 group-hover:text-indigo-500 text-sm">
                     →
