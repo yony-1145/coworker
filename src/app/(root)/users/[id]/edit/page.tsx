@@ -1,7 +1,15 @@
 'use client';
 
-import { useEffect, useState, ChangeEvent, FormEvent, use } from 'react';
+import {
+  useEffect,
+  useState,
+  ChangeEvent,
+  FormEvent,
+  use,
+  useRef,
+} from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 interface UserProfile {
   id: string;
@@ -25,6 +33,7 @@ export default function UserProfileEditPage({
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -43,6 +52,37 @@ export default function UserProfileEditPage({
     };
     fetchProfile();
   }, [id]);
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !profile) return;
+
+    try {
+      const filePath = `${profile.id}_${Date.now()}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('user-icons')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('user-icons')
+        .getPublicUrl(filePath);
+
+      const publicUrl = data.publicUrl;
+
+      setPreview(publicUrl);
+      setProfile({ ...profile, iconUrl: publicUrl });
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('画像のアップロードに失敗しました。');
+    }
+  };
 
   if (loading)
     return <p className="text-center mt-20 text-gray-500">読み込み中...</p>;
@@ -109,11 +149,21 @@ export default function UserProfileEditPage({
         >
           {/* ヘッダー */}
           <div className="flex items-center gap-6">
-            <div className="relative w-24 h-24">
+            <div
+              className="relative w-24 h-24 cursor-pointer"
+              onClick={handleImageClick}
+            >
               <img
                 src={preview || '/user-icons/cat5.png'}
                 alt={profile.displayName}
-                className="w-24 h-24 rounded-full shadow-md border-4 border-white object-cover"
+                className="w-24 h-24 rounded-full shadow-md border-4 border-white object-cover hover:opacity-80 transition"
+              />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
               />
             </div>
 
