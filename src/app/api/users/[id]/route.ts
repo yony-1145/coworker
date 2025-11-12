@@ -1,63 +1,55 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-// import { getServerSession } from 'next-auth';
-// import { authOptions } from '@/lib/auth';
 
-// 公開プロフィールの取得
+// GET /api/users/[id]
 export async function GET(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
+  _req: Request,
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await context.params;
-
+    // UserProfileを取得
     const profile = await prisma.userProfile.findUnique({
-      where: { userId: id },
+      where: { userId: params.id },
     });
 
     if (!profile) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    return NextResponse.json(profile);
+    return NextResponse.json(profile, { status: 200 });
   } catch (error) {
-    console.error('GET /api/users/[id] Error:', error);
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    console.error('Failed to fetch user:', error);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
 
-// プロフィールの更新
+// PUT /api/users/[id]
 export async function PUT(
   req: Request,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await context.params;
-
     const body = await req.json();
 
-    const cleanData = Object.fromEntries(
-      Object.entries(body).filter(([_, v]) => v !== undefined)
-    );
-
-    const updated = await prisma.userProfile.upsert({
-      where: { userId: id },
-      update: cleanData,
-      create: {
-        userId: id,
-        ...cleanData,
+    const updatedProfile = await prisma.userProfile.update({
+      where: { userId: params.id },
+      data: {
+        displayName: body.displayName,
+        headline: body.headline,
+        occupation: body.occupation,
+        affiliation: body.affiliation,
+        location: body.location,
+        age: body.age,
+        bioText: body.bioText,
+        links: body.links,
+        tags: body.tags,
+        iconUrl: body.iconUrl,
       },
     });
 
-    return NextResponse.json(updated);
+    return NextResponse.json(updatedProfile, { status: 200 });
   } catch (error) {
-    console.error('PUT /api/users/[id] Error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
-      { status: 500 }
-    );
+    console.error('Failed to update user profile:', error);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }

@@ -5,7 +5,8 @@ import { compare } from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-const handler = NextAuth({
+// authOptionsをエクスポート
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -24,23 +25,17 @@ const handler = NextAuth({
         const isValid = await compare(credentials.password, user.password);
         if (!isValid) return null;
 
-        // DBのuser.idを返す
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        };
+        return { id: user.id, name: user.name, email: user.email };
       },
     }),
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30日間セッション維持
+    maxAge: 30 * 24 * 60 * 60,
   },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async jwt({ token, user }) {
-      // userが初回サインイン時に存在する場合のみDB IDをコピー
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -48,7 +43,6 @@ const handler = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      // session.user.id に token.id（＝DBのuser.id）を設定
       if (token) {
         session.user.id = token.id;
         session.user.email = token.email;
@@ -59,6 +53,8 @@ const handler = NextAuth({
   pages: {
     signIn: '/login',
   },
-});
+};
 
+// handlerをauthOptionsから生成
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };

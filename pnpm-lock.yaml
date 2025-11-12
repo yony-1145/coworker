@@ -1950,8 +1950,8 @@ packages:
   ohash@2.0.11:
     resolution: {integrity: sha512-RdR9FQrFwNBNXAr4GixM8YaRZRJ5PUWbKYbE5eOsrwAjJW0q2REGcf79oYPsLyskQCZG1PLN+S/K1V00joZAoQ==}
 
-  oidc-token-hash@5.1.1:
-    resolution: {integrity: sha512-D7EmwxJV6DsEB6vOFLrBM2OzsVgQzgPWyHlV2OOAVj772n+WTXpudC9e9u5BVKQnYwaD30Ivhi9b+4UeBcGu9g==}
+  oidc-token-hash@5.2.0:
+    resolution: {integrity: sha512-6gj2m8cJZ+iSW8bm0FXdGF0YhIQbKrfP4yWTNzxc31U6MOjfEmB1rHvlYvxI1B7t7BCi1F2vYTT6YhtQRG4hxw==}
     engines: {node: ^10.13.0 || >=12.0.0}
 
   openid-client@5.7.1:
@@ -4417,14 +4417,14 @@ snapshots:
 
   ohash@2.0.11: {}
 
-  oidc-token-hash@5.1.1: {}
+  oidc-token-hash@5.2.0: {}
 
   openid-client@5.7.1:
     dependencies:
       jose: 4.15.9
       lru-cache: 6.0.0
       object-hash: 2.2.0
-      oidc-token-hash: 5.1.1
+      oidc-token-hash: 5.2.0
 
   optionator@0.9.4:
     dependencies:

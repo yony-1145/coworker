@@ -1,5 +1,6 @@
-import { baseApiUrl } from 'mapbox-gl';
 import Link from 'next/link';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 interface UserProfile {
   id: string;
@@ -20,7 +21,8 @@ export default async function UserProfilePage({
   params: { id: string };
 }) {
   const { id } = params;
-  const isOwner = true; // 後でNextAuth制御に置換
+  const session = await getServerSession(authOptions);
+  const isOwner = session?.user?.id === params.id;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
   // 相対パスでfetch

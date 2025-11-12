@@ -5,6 +5,8 @@ import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+
   const router = useRouter();
   const { data: session } = useSession();
   const [email, setEmail] = useState('');
@@ -12,7 +14,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
 
   if (session) {
-    router.push(`/users/${session.user.id}`);
+    router.push(`${baseUrl}/users/${session.user.id}`);
     return null;
   }
 

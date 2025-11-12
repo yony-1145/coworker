@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, ChangeEvent, FormEvent, use } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface UserProfile {
   id: string;
@@ -17,20 +18,28 @@ interface UserProfile {
 export default function UserProfileEditPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
   const { id } = use(params);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const res = await fetch(`/api/users/${id}`, { cache: 'no-store' });
-      const data = await res.json();
-      setProfile(data);
-      setPreview(data.iconUrl || null);
-      setLoading(false);
+      try {
+        const res = await fetch(`/api/users/${id}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`Failed: ${res.status}`);
+        const data = await res.json();
+        setProfile(data);
+        setPreview(data.iconUrl || null);
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+        setProfile(null);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchProfile();
   }, [id]);
@@ -55,18 +64,21 @@ export default function UserProfileEditPage({
     e.preventDefault();
     if (!profile) return;
 
+    const payload = {
+      ...profile,
+      links: profile.links ?? {}, // null回避
+      tags: profile.tags ?? [],
+    };
+
     try {
       const res = await fetch(`/api/users/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profile),
+        body: JSON.stringify(payload),
       });
-
-      if (!res.ok) {
-        throw new Error(`更新に失敗しました (${res.status})`);
-      }
-
+      if (!res.ok) throw new Error(`更新に失敗しました (${res.status})`);
       alert('プロフィールを保存しました');
+      router.push(`/users/${id}`);
     } catch (err) {
       console.error(err);
       alert('エラーが発生しました。もう一度お試しください。');
