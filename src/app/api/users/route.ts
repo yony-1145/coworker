@@ -1,33 +1,52 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-// GET /api/users?email=xxx@example.com
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const email = searchParams.get('email');
-
-  if (!email) {
-    return NextResponse.json({ error: 'email is required' }, { status: 400 });
-  }
-
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
   try {
     const user = await prisma.user.findUnique({
-      where: { email },
-      select: {
-        id: true,
-        name: true,
-        image: true,
-        email: true,
-      },
+      where: { id: params.id },
+      include: { profile: true },
     });
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    return NextResponse.json(user);
+    return NextResponse.json(user, { status: 200 });
   } catch (error) {
-    console.error('DB query failed:', error);
+    console.error('Failed to fetch user:', error);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+  }
+}
+
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const body = await req.json();
+
+    const updated = await prisma.userProfile.update({
+      where: { userId: params.id },
+      data: {
+        displayName: body.displayName,
+        headline: body.headline,
+        occupation: body.occupation,
+        affiliation: body.affiliation,
+        location: body.location,
+        age: body.age,
+        bioText: body.bioText,
+        links: body.links,
+        tags: body.tags,
+      },
+    });
+
+    return NextResponse.json(updated, { status: 200 });
+  } catch (error) {
+    console.error('Failed to update user profile:', error);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
