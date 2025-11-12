@@ -10,7 +10,7 @@ interface UserProfile {
   headline?: string;
   occupation?: string;
   affiliation?: string;
-  links?: Record<string, string>;
+  links?: string[];
   bioText?: string;
   tags?: string[];
 }
@@ -204,7 +204,7 @@ export default function UserProfileEditPage({
               SNSリンク
             </h2>
             <div className="flex flex-col gap-2">
-              {Object.entries(profile.links || {}).map(([key, url], i) => (
+              {(profile.links || []).map((url, i) => (
                 <div
                   key={i}
                   className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-lg border border-gray-200"
@@ -217,7 +217,9 @@ export default function UserProfileEditPage({
                         prev
                           ? {
                               ...prev,
-                              links: { ...prev.links, [key]: e.target.value },
+                              links: prev.links?.map((l, idx) =>
+                                idx === i ? e.target.value : l
+                              ),
                             }
                           : prev
                       )
@@ -228,12 +230,14 @@ export default function UserProfileEditPage({
                   <button
                     type="button"
                     onClick={() =>
-                      setProfile((prev) => {
-                        if (!prev) return prev;
-                        const updated = { ...prev.links };
-                        delete updated[key];
-                        return { ...prev, links: updated };
-                      })
+                      setProfile((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              links: prev.links?.filter((_, idx) => idx !== i),
+                            }
+                          : prev
+                      )
                     }
                     className="text-indigo-500 hover:text-indigo-700 font-medium"
                   >
@@ -247,10 +251,7 @@ export default function UserProfileEditPage({
                 onClick={() =>
                   setProfile((prev) =>
                     prev
-                      ? {
-                          ...prev,
-                          links: { ...prev.links, [`link${Date.now()}`]: '' },
-                        }
+                      ? { ...prev, links: [...(prev.links || []), ''] }
                       : prev
                   )
                 }

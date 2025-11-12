@@ -11,7 +11,7 @@ interface UserProfile {
   affiliation?: string;
   location?: string;
   age?: number;
-  links?: Record<string, string>;
+  links?: string[];
   bioText?: string;
   tags?: string[];
 }
@@ -100,20 +100,20 @@ export default async function UserProfilePage({
         )}
 
         {/* SNSリンク */}
-        {profile.links && Object.values(profile.links).length > 0 && (
+        {Array.isArray(profile.links) && profile.links.length > 0 && (
           <section className="border-t pt-4 space-y-3">
             <h2 className="text-xl font-semibold text-gray-900">SNSリンク</h2>
             <div className="flex flex-col gap-3 mt-3">
-              {profile.links.map((link, i) => (
+              {profile.links.map((url, i) => (
                 <a
                   key={i}
-                  href={link.url}
+                  href={url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center justify-between rounded-xl border border-gray-200 bg-gradient-to-r from-gray-50 to-white px-5 py-3 shadow-sm hover:from-indigo-50 hover:border-indigo-300 transition-all duration-200"
                 >
                   <span className="text-gray-700 group-hover:text-indigo-700 font-medium truncate">
-                    {link.label}
+                    {new URL(url).hostname.replace('www.', '')}
                   </span>
                   <span className="text-gray-400 group-hover:text-indigo-500 text-sm">
                     →
