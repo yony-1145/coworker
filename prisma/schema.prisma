@@ -84,7 +84,7 @@ model UserProfile {
   affiliation String?
   location    String?
   age         Int?
-  links       Json?
+  links       Json?    @default("[]")
   tags        Json?
   bioText     String?
   createdAt   DateTime @default(now())
