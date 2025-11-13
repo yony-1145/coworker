@@ -58,26 +58,32 @@ export default function UserProfileEditPage({
   };
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    // <input type="file"> で選択された最初のファイル（fileInputRef）を取得
     const file = e.target.files?.[0];
     if (!file || !profile) return;
 
     try {
       const filePath = `${profile.id}_${Date.now()}`;
-
+      // Supabase Storageにインプットで選択されたファイルをアップロード
       const { error: uploadError } = await supabase.storage
         .from('user-icons')
         .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
+      // アップロードしたファイルを取得し、公開URLを取得
       const { data } = supabase.storage
         .from('user-icons')
         .getPublicUrl(filePath);
 
       const publicUrl = data.publicUrl;
 
+      // 公開URLにプレビュー更新
       setPreview(publicUrl);
       setProfile({ ...profile, iconUrl: publicUrl });
+      alert(
+        '画像をアップロードしました。保存ボタンを押して変更を確定してください。'
+      );
     } catch (err) {
       console.error('Upload failed:', err);
       alert('画像のアップロードに失敗しました。');
@@ -100,17 +106,20 @@ export default function UserProfileEditPage({
     setProfile((prev) => (prev ? { ...prev, [name]: value } : prev));
   };
 
+  // プロフィール編集フォームの送信処理
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!profile) return;
 
+    // APIに送信するデータを整形
     const payload = {
       ...profile,
-      links: profile.links ?? {}, // null回避
-      tags: profile.tags ?? [],
+      links: profile.links ?? {}, // nullなら[]にする
+      tags: profile.tags ?? [], /// nullなら[]にする
     };
 
     try {
+      //　ユーザデータを PUT API に送信
       const res = await fetch(`/api/users/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -118,6 +127,7 @@ export default function UserProfileEditPage({
       });
       if (!res.ok) throw new Error(`更新に失敗しました (${res.status})`);
       alert('プロフィールを保存しました');
+      // 成功時：通知を表示し、ユーザー詳細ページへ遷移
       router.push(`/users/${id}`);
     } catch (err) {
       console.error(err);
@@ -254,6 +264,7 @@ export default function UserProfileEditPage({
               SNSリンク
             </h2>
             <div className="flex flex-col gap-2">
+              {/* DBから取得したリンクの配列をループで表示 */}
               {(profile.links || []).map((url, i) => (
                 <div
                   key={i}
@@ -262,7 +273,9 @@ export default function UserProfileEditPage({
                   <input
                     type="url"
                     value={url}
+                    // URLの変更、prevが
                     onChange={(e) =>
+                      // インデックスが一致するリンクを更新
                       setProfile((prev) =>
                         prev
                           ? {
@@ -279,7 +292,9 @@ export default function UserProfileEditPage({
                   />
                   <button
                     type="button"
+                    // リンクの削除
                     onClick={() =>
+                      // インデックスが一致するリンクを配列から削除
                       setProfile((prev) =>
                         prev
                           ? {
@@ -298,6 +313,7 @@ export default function UserProfileEditPage({
 
               <button
                 type="button"
+                // リンクの追加、空の要素を追加
                 onClick={() =>
                   setProfile((prev) =>
                     prev
@@ -327,6 +343,7 @@ export default function UserProfileEditPage({
                     type="text"
                     value={tag}
                     onChange={(e) =>
+                      // インデックスが一致するタグを更新
                       setProfile((prev) =>
                         prev
                           ? {
@@ -343,6 +360,7 @@ export default function UserProfileEditPage({
                   <button
                     type="button"
                     onClick={() =>
+                      // インデックスが一致するタグを配列から削除
                       setProfile((prev) =>
                         prev
                           ? {
@@ -361,6 +379,7 @@ export default function UserProfileEditPage({
               <button
                 type="button"
                 onClick={() =>
+                  // タグの追加、空の要素を追加
                   setProfile((prev) =>
                     prev ? { ...prev, tags: [...(prev.tags || []), ''] } : prev
                   )

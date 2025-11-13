@@ -10,6 +10,18 @@ export async function GET(
     // UserProfileを取得
     const profile = await prisma.userProfile.findUnique({
       where: { userId: params.id },
+      select: {
+        id: true,
+        userId: true,
+        displayName: true,
+        iconUrl: true,
+        headline: true,
+        occupation: true,
+        affiliation: true,
+        bioText: true,
+        links: true,
+        tags: true,
+      },
     });
 
     if (!profile) {
@@ -31,19 +43,28 @@ export async function PUT(
   try {
     const body = await req.json();
 
-    const updatedProfile = await prisma.userProfile.update({
+    const updatedProfile = await prisma.userProfile.upsert({
       where: { userId: params.id },
-      data: {
+      update: {
         displayName: body.displayName,
+        iconUrl: body.iconUrl,
         headline: body.headline,
         occupation: body.occupation,
         affiliation: body.affiliation,
-        location: body.location,
-        age: body.age,
         bioText: body.bioText,
         links: body.links,
         tags: body.tags,
-        iconUrl: body.iconUrl,
+      },
+      create: {
+        userId: params.id,
+        displayName: body.displayName ?? '',
+        iconUrl: body.iconUrl ?? null,
+        headline: body.headline ?? null,
+        occupation: body.occupation ?? null,
+        affiliation: body.affiliation ?? null,
+        bioText: body.bioText ?? null,
+        links: body.links ?? [],
+        tags: body.tags ?? [],
       },
     });
 
