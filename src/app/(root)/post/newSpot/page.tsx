@@ -7,8 +7,6 @@ import { useRouter } from 'next/navigation';
 export default function PostStep1() {
   const router = useRouter();
   const mapRef = useRef<any>(null);
-
-  const [title, setTitle] = useState('');
   const [address, setAddress] = useState('');
   const [coords, setCoords] = useState<{
     latitude: number;
@@ -72,31 +70,24 @@ export default function PostStep1() {
 
   // --- 詳細登録へ遷移 ---
   const handleNext = () => {
-    if (!coords || !title) {
-      alert('タイトルと位置を入力してください');
+    if (!coords) {
+      alert('住所を入力してください');
       return;
     }
     router.push(
-      `/post/new/details?title=${encodeURIComponent(title)}&lat=${coords.latitude}&lon=${coords.longitude}`
+      `/post/new/details?lat=${coords.latitude}&lon=${coords.longitude}`
     );
   };
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-6">
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-lg p-6 space-y-5">
-        <h1 className="text-xl font-semibold text-gray-800">スポットを追加</h1>
-
-        {/* タイトル */}
-        <div>
-          <label className="block text-sm text-gray-700 mb-1">タイトル</label>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="例：スターバックス博多"
-            className="w-full border rounded-lg px-3 py-2"
-          />
-        </div>
-
+        <h1 className="text-xl font-semibold text-gray-800">
+          Step 1 / 2：場所を決定
+        </h1>
+        <p className="mt-1 text-sm text-gray-500">
+          住所検索または地図をクリックして、スポットの位置を選択してください。
+        </p>
         {/* 住所 */}
         <div>
           <label className="block text-sm text-gray-700 mb-1">
@@ -119,7 +110,7 @@ export default function PostStep1() {
             </button>
           </div>
 
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-3 text-xs text-gray-500">
             地名と店舗名はスペースで区切ると検索精度が上がります。
           </p>
 
