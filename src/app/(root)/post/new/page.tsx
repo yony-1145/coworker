@@ -75,7 +75,7 @@ export default function PostStep1() {
       return;
     }
     router.push(
-      `/post/new/details?lat=${coords.latitude}&lon=${coords.longitude}`
+      `/post/new/details?lat=${coords.latitude}&lon=${coords.longitude}&address=${encodeURIComponent(address)}`
     );
   };
 
