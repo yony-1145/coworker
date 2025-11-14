@@ -20,13 +20,46 @@ export default function PostStep1() {
 
   // --- geocode API ---
   const handleGeocode = async () => {
-    const res = await fetch('/api/geocode', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ address }),
-    });
-    const data = await res.json();
-    setCandidates(data.results || []);
+    try {
+      const res = await fetch('/api/geocode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address }),
+      });
+
+      // HTTP エラー（400/500）
+      if (!res.ok) {
+        console.error('Geocode API HTTP error:', res.status);
+        setCandidates([]);
+        return;
+      }
+
+      let data: any;
+
+      // JSON パース安全化
+      try {
+        data = await res.json();
+      } catch (err) {
+        console.error('Failed to parse API JSON:', err);
+        setCandidates([]);
+        return;
+      }
+
+      // API の error フィールドがある場合（住所ゼロ or 外部API不調）
+      if (data.error) {
+        console.warn('Geocode API returned error:', data.error);
+        setCandidates([]);
+        return;
+      }
+
+      // 正常パス
+      const results = Array.isArray(data.results) ? data.results : [];
+      setCandidates(results);
+    } catch (error) {
+      // fetch がそもそも失敗
+      console.error('Geocode fetch failed:', error);
+      setCandidates([]);
+    }
   };
 
   // --- 候補選択 ---
@@ -69,6 +102,7 @@ export default function PostStep1() {
           <label className="block text-sm text-gray-700 mb-1">
             住所または地名
           </label>
+
           <div className="flex space-x-2">
             <input
               value={address}
@@ -85,7 +119,10 @@ export default function PostStep1() {
             </button>
           </div>
 
-          {/* 候補リスト */}
+          <p className="mt-1 text-xs text-gray-500">
+            地名と店舗名はスペースで区切ると検索精度が上がります。
+          </p>
+
           {candidates.length > 0 && (
             <ul className="mt-2 border rounded-md divide-y">
               {candidates.map((c, i) => (
