@@ -21,25 +21,26 @@ export default function MapPage() {
     zoom: 10,
   };
 
-  // --- 他ユーザーの位置を取得 ---
-  useEffect(() => {
-    const fetchLocations = async () => {
-      const res = await fetch('/api/locations', { cache: 'no-store' });
-      const data = await res.json();
-      const others = data.filter(
-        (loc: any) => loc.user?.email !== currentUserEmail
-      );
-      setLocations(others);
-    };
-    fetchLocations();
-  }, []);
+  // // --- 他ユーザーの位置を取得 ---
+  // useEffect(() => {
+  //   const fetchLocations = async () => {
+  //     const res = await fetch('/api/locations', { cache: 'no-store' });
+  //     const data = await res.json();
+  //     const others = data.spots.filter(
+  //       (loc: any) => loc.user?.email !== currentUserEmail
+  //     );
+  //     setLocations(others);
+  //   };
+  //   fetchLocations();
+  // }, []);
 
   // --- スポット一覧を取得 ---
   useEffect(() => {
     const fetchSpots = async () => {
       const res = await fetch('/api/spots', { cache: 'no-store' });
       const data = await res.json();
-      setSpots(data);
+      // APIレスポンスは { ok: true, spots: [...] } なので、配列だけを state に入れる
+      setSpots(Array.isArray(data?.spots) ? data.spots : []);
     };
     fetchSpots();
   }, []);

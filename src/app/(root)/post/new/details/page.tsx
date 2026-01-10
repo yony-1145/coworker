@@ -68,7 +68,7 @@ export default function SpotDetailsPage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        userId: '37c18ff7-c0c5-42a0-8925-fa2ae95e1f9a', // TODO: 認証導入後に session.user.id に変更
+        userId: 'cmhm5bc6x00019oq40rbmkjle', // TODO: 認証導入後に session.user.id に変更
         title,
         description,
         latitude,
