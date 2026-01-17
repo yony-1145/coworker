@@ -1,6 +1,5 @@
 import { useState, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import { profileValidators } from '@/lib/validation/profileValidators';
 
 /**
@@ -8,17 +7,20 @@ import { profileValidators } from '@/lib/validation/profileValidators';
  * - 状態管理
  * - バリデーション
  * - 送信処理
- * - 画像アップロード処理
+ * - 画像アップロード処理（/api/uploads 経由）
  */
 export const useProfileForm = (initialProfile: any, id: string) => {
   const [profile, setProfile] = useState(initialProfile);
   const [errors, setErrors] = useState<Record<string, string | string[]>>({});
   const [preview, setPreview] = useState<string | null>(
-    initialProfile.iconUrl || null
+    initialProfile.iconUrl || null,
   );
   const router = useRouter();
 
-  /** 全項目の一括バリデーション */
+  /**
+   * 全項目の一括バリデーション
+   * - validators を全走査し、エラーがある項目だけを errors に格納する
+   */
   const validateAll = (p: any) => {
     const newErrors: Record<string, string | string[]> = {};
     for (const [key, rule] of Object.entries(profileValidators)) {
@@ -32,7 +34,10 @@ export const useProfileForm = (initialProfile: any, id: string) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  /** 単項目の変更＋即時バリデーション */
+  /**
+   * 単項目の変更＋即時バリデーション
+   * - 入力値を更新し、対象項目だけ validators を適用して errors を更新する
+   */
   const handleChange = (name: string, value: string) => {
     setProfile((prev: any) => ({ ...prev, [name]: value }));
     const rule = profileValidators[name as keyof typeof profileValidators];
@@ -42,21 +47,30 @@ export const useProfileForm = (initialProfile: any, id: string) => {
     }
   };
 
-  /** SNSリンク配列の更新＋バリデーション */
+  /**
+   * SNSリンク配列の更新＋バリデーション
+   * - links の配列を更新し、配列用の validators を適用する
+   */
   const handleLinkChange = (links: string[]) => {
     setProfile((prev: any) => ({ ...prev, links }));
     const linkErrors = profileValidators.links(links);
     setErrors((prev) => ({ ...prev, links: linkErrors }));
   };
 
-  /** タグ配列の更新＋バリデーション */
+  /**
+   * タグ配列の更新＋バリデーション
+   * - tags の配列を更新し、配列用の validators を適用する
+   */
   const handleTagChange = (tags: string[]) => {
     setProfile((prev: any) => ({ ...prev, tags }));
     const tagError = profileValidators.tags(tags);
     setErrors((prev) => ({ ...prev, tags: tagError }));
   };
 
-  /** 保存処理 */
+  /**
+   * 保存処理
+   * - 全項目をバリデーションしてから API に PUT する
+   */
   const handleSubmit = async () => {
     if (!validateAll(profile)) {
       alert('入力内容に誤りがあります。修正してください。');
@@ -76,7 +90,14 @@ export const useProfileForm = (initialProfile: any, id: string) => {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error(`更新に失敗しました (${res.status})`);
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || data?.ok === false) {
+        const msg =
+          data?.error?.message ?? `更新に失敗しました (${res.status})`;
+        throw new Error(msg);
+      }
+
       alert('プロフィールを保存しました');
       router.push(`/users/${id}`);
     } catch (err) {
@@ -85,22 +106,35 @@ export const useProfileForm = (initialProfile: any, id: string) => {
     }
   };
 
-  /** 画像アップロード（Supabase Storage） */
+  /**
+   * 画像アップロード（/api/uploads 経由）
+   * - クライアントから Storage に直接 upload せず、サーバAPIに File を送信する
+   * - ログイン必須チェックはサーバ側（NextAuth）で行われる
+   */
   const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !profile) return;
 
     try {
-      const filePath = `${profile.id}_${Date.now()}`;
-      const { error: uploadError } = await supabase.storage
-        .from('user-icons')
-        .upload(filePath, file, { upsert: true });
-      if (uploadError) throw uploadError;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', 'user');
 
-      const { data } = supabase.storage
-        .from('user-icons')
-        .getPublicUrl(filePath);
-      const publicUrl = data.publicUrl;
+      const uploadRes = await fetch('/api/uploads', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const uploadData = await uploadRes.json().catch(() => null);
+
+      if (!uploadRes.ok || uploadData?.ok === false) {
+        const msg =
+          uploadData?.error?.message ?? '画像のアップロードに失敗しました。';
+        alert(msg);
+        return;
+      }
+
+      const publicUrl: string = uploadData.url;
 
       setPreview(publicUrl);
       setProfile({ ...profile, iconUrl: publicUrl });
