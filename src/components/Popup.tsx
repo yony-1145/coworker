@@ -19,15 +19,19 @@ export default function Popup({
   message,
   onClose,
 }: PopupProps) {
+  if (!item) return null;
+
   const name = type === 'user' ? item?.name : item?.title;
+
   const image =
     type === 'user'
       ? (item?.image ?? '/user-icons/default.png')
-      : (item?.image ?? '/spot-icons/default.png');
+      : (item?.imageUrls?.[0] ?? '/spot-icons/default.png');
+
   const href =
     type === 'user'
       ? `/users/${item?.id}`
-      : `/spots/${item.id}?lat=${item.latitude}&lng=${item.longitude}`;
+      : `/spots/${item?.id}?lat=${item?.latitude}&lng=${item?.longitude}`;
 
   return (
     <MapPopup

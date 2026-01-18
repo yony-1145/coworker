@@ -101,7 +101,7 @@ export default function MapPage() {
           />
         );
       }),
-    [spots, popupInfo]
+    [spots, popupInfo],
   );
 
   return (
@@ -125,9 +125,6 @@ export default function MapPage() {
             message={popupInfo.message ?? popupInfo.description}
             onClose={() => setPopupInfo(null)}
           />
-        )}
-        {popupInfo?.type === 'spot' && (
-          <Popup spot={popupInfo} onClose={() => setPopupInfo(null)} />
         )}
       </Map>
     </>

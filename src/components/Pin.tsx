@@ -18,11 +18,14 @@ export default function Pin({
   showName = true,
   onClick,
 }: PinProps) {
+  if (!item) return null;
+
   const name = type === 'user' ? item?.name : item?.title;
+
   const image =
     type === 'user'
       ? (item?.image ?? '/user-icons/default.png')
-      : (item?.image ?? '/spot-icons/default.png');
+      : (item?.imageUrls?.[0] ?? '/spot-icons/default.png');
 
   return (
     <Marker
