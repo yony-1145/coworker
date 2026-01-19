@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const spot = await prisma.spot.findUnique({
@@ -41,7 +41,10 @@ export async function GET(
     });
 
     if (!spot) {
-      return NextResponse.json({ error: 'Not found' }, { status: 404 });
+      return NextResponse.json(
+        { ok: false, error: { code: 'NOT_FOUND', message: 'Not found' } },
+        { status: 404 },
+      );
     }
 
     const avgRating =
@@ -50,16 +53,25 @@ export async function GET(
             (
               spot.ratings.reduce((sum, r) => sum + r.score, 0) /
               spot.ratings.length
-            ).toFixed(1)
+            ).toFixed(1),
           )
         : null;
 
-    return NextResponse.json({ ...spot, avgRating });
+    return NextResponse.json({
+      ok: true,
+      spot: { ...spot, avgRating },
+    });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
+      {
+        ok: false,
+        error: {
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Internal Server Error',
+        },
+      },
+      { status: 500 },
     );
   }
 }

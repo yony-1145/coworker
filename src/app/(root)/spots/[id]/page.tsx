@@ -5,14 +5,16 @@ type SpotPageProps = {
 };
 
 export default async function SpotPage({ params }: SpotPageProps) {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/spots/${params.id}`,
-    {
-      cache: 'no-store', // 常に最新データを取得
-    }
-  );
+  const { id } = params;
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+  const res = await fetch(`${baseUrl}/api/spots/${id}`, {
+    cache: 'no-store',
+  });
 
   if (!res.ok) {
+    console.error('Failed to fetch spot:', res.status, res.statusText);
     return (
       <div className="max-w-2xl mx-auto p-4 text-center text-gray-600">
         スポット情報を取得できませんでした。
@@ -20,7 +22,17 @@ export default async function SpotPage({ params }: SpotPageProps) {
     );
   }
 
-  const spot = await res.json();
+  const data = await res.json();
+  const spot = data?.spot;
+
+  if (!data?.ok || !spot) {
+    console.error('Invalid response shape:', data);
+    return (
+      <div className="max-w-2xl mx-auto p-4 text-center text-gray-600">
+        スポット情報を取得できませんでした。
+      </div>
+    );
+  }
 
   return <SpotDetail spot={spot} />;
 }

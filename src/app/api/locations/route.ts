@@ -19,7 +19,7 @@ export async function GET() {
     console.error('Error fetching locations:', error);
     return NextResponse.json(
       { error: 'Failed to fetch locations' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
