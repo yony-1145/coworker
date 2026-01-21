@@ -26,15 +26,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja">
-      <body>
-        <NextAuthProvider>
-          <div className="flex min-h-screen">
-            <SideNav />
-            <main className="flex-1 p-6 overflow-hidden">{children}</main>
-          </div>
-        </NextAuthProvider>
-      </body>
-    </html>
+    <NextAuthProvider>
+      <div className="flex min-h-screen">
+        <SideNav />
+        <main className="flex-1 p-6 overflow-hidden">{children}</main>
+      </div>
+    </NextAuthProvider>
   );
 }
