@@ -3,38 +3,59 @@
 import { useEffect, useState, use } from 'react';
 import { ProfileForm } from '@/components/ProfileForm';
 
-/**
- * /users/[id]/edit
- * - プロフィールデータ取得とレイアウト担当
- * - Form側で編集・保存を完結
- */
+type UserProfile = {
+  id: string;
+  userId: string;
+  iconUrl?: string | null;
+  headline?: string | null;
+  occupation?: string | null;
+  affiliation?: string | null;
+  location?: string | null;
+  age?: number | null;
+  links?: unknown;
+  tags?: unknown;
+  bioText?: string | null;
+  updatedAt: string;
+};
+
+type UserResponse = {
+  id: string;
+  name: string;
+  profile: UserProfile | null;
+};
+
 export default function UserProfileEditPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const [profile, setProfile] = useState<any>(null);
+
+  const [user, setUser] = useState<UserResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchUser = async () => {
       const res = await fetch(`/api/users/${id}`, { cache: 'no-store' });
       const data = await res.json();
-      setProfile(data);
+      setUser(data);
       setLoading(false);
     };
-    fetchProfile();
+
+    fetchUser();
   }, [id]);
 
-  if (loading)
+  if (loading) {
     return <p className="text-center mt-20 text-gray-500">読み込み中...</p>;
-  if (!profile)
+  }
+
+  if (!user || !user.profile) {
     return (
       <p className="text-center mt-20 text-gray-500">
         ユーザーが見つかりません。
       </p>
     );
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12">
@@ -52,7 +73,11 @@ export default function UserProfileEditPage({
           </button>
         </div>
 
-        <ProfileForm initialProfile={profile} id={id} />
+        <ProfileForm
+          initialProfile={user.profile}
+          initialUserName={user.name}
+          id={id}
+        />
       </div>
     </main>
   );

@@ -9,29 +9,32 @@ import { TagsField } from './TagsField';
  * プロフィール編集フォーム
  * - すべての入力項目＋画像アップロード
  * - エラー・空要素を含む場合、保存ボタンを無効化
+ *
+ * 表示名は User.name を編集対象とする
  */
-export const ProfileForm = ({ initialProfile, id }: any) => {
+export const ProfileForm = ({ initialProfile, initialUserName, id }: any) => {
   const {
+    name,
     profile,
     preview,
     errors,
+    handleNameChange,
     handleChange,
     handleLinkChange,
     handleTagChange,
     handleImageChange,
     handleSubmit,
-  } = useProfileForm(initialProfile, id);
+  } = useProfileForm(initialProfile, initialUserName, id);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   /** 保存ボタン無効化条件 */
   const hasErrors =
     Object.values(errors).some((e) =>
-      Array.isArray(e) ? e.some(Boolean) : Boolean(e)
+      Array.isArray(e) ? e.some(Boolean) : Boolean(e),
     ) ||
-    // linksに空文字が含まれる場合もブロック
+    !name.trim() ||
     (profile.links?.some((l: string) => !l.trim()) ?? false) ||
-    // tagsに空文字が含まれる場合もブロック
     (profile.tags?.some((t: string) => !t.trim()) ?? false);
 
   return (
@@ -51,7 +54,7 @@ export const ProfileForm = ({ initialProfile, id }: any) => {
         >
           <img
             src={preview || '/user-icons/cat5.png'}
-            alt={profile.displayName}
+            alt={name}
             className="w-24 h-24 rounded-full shadow-md border-4 border-white object-cover hover:opacity-80 transition"
           />
           <input
@@ -69,18 +72,18 @@ export const ProfileForm = ({ initialProfile, id }: any) => {
           </label>
           <input
             type="text"
-            name="displayName"
-            value={profile.displayName}
-            onChange={(e) => handleChange('displayName', e.target.value)}
+            name="name"
+            value={name}
+            onChange={(e) => handleNameChange(e.target.value)}
             className={`w-full rounded-md border px-3 py-1.5 text-gray-800 focus:ring-2 focus:ring-indigo-400 transition ${
-              errors.displayName
+              errors.name
                 ? 'border-red-400 bg-red-50'
                 : 'border-gray-300 bg-gray-50'
             }`}
             placeholder="名前を入力"
           />
-          {errors.displayName && (
-            <p className="text-xs text-red-600 mt-1">{errors.displayName}</p>
+          {errors.name && (
+            <p className="text-xs text-red-600 mt-1">{errors.name}</p>
           )}
         </div>
       </div>

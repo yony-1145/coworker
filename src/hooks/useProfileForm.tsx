@@ -9,41 +9,71 @@ import { profileValidators } from '@/lib/validation/profileValidators';
  * - 送信処理
  * - 画像アップロード処理（/api/uploads 経由）
  */
-export const useProfileForm = (initialProfile: any, id: string) => {
+export const useProfileForm = (
+  initialProfile: any,
+  initialUserName: string,
+  id: string,
+) => {
+  const [name, setName] = useState(initialUserName ?? '');
   const [profile, setProfile] = useState(initialProfile);
   const [errors, setErrors] = useState<Record<string, string | string[]>>({});
   const [preview, setPreview] = useState<string | null>(
-    initialProfile.iconUrl || null,
+    initialProfile?.iconUrl || null,
   );
   const router = useRouter();
 
   /**
    * 全項目の一括バリデーション
-   * - validators を全走査し、エラーがある項目だけを errors に格納する
+   * - profileValidators を全走査し、エラーがある項目だけを errors に格納する
+   * - name は displayName のバリデータを流用して検証する
    */
-  const validateAll = (p: any) => {
+  const validateAll = (p: any, userName: string) => {
     const newErrors: Record<string, string | string[]> = {};
+
     for (const [key, rule] of Object.entries(profileValidators)) {
+      if (key === 'displayName') continue;
       const value = key === 'links' ? (p.links ?? []) : ((p as any)[key] ?? '');
       const err = rule(value);
       if (err && (Array.isArray(err) ? err.some(Boolean) : err)) {
         newErrors[key] = err;
       }
     }
+
+    const nameRule = profileValidators.displayName;
+    if (nameRule) {
+      const err = nameRule(userName ?? '');
+      if (err && (Array.isArray(err) ? err.some(Boolean) : err)) {
+        newErrors.name = err as any;
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  /**
+   * 表示名（User.name）の変更＋即時バリデーション
+   * - profileValidators.displayName を流用
+   */
+  const handleNameChange = (value: string) => {
+    setName(value);
+    const rule = profileValidators.displayName;
+    if (rule) {
+      const err = rule(value);
+      setErrors((prev) => ({ ...prev, name: err }));
+    }
   };
 
   /**
    * 単項目の変更＋即時バリデーション
    * - 入力値を更新し、対象項目だけ validators を適用して errors を更新する
    */
-  const handleChange = (name: string, value: string) => {
-    setProfile((prev: any) => ({ ...prev, [name]: value }));
-    const rule = profileValidators[name as keyof typeof profileValidators];
+  const handleChange = (field: string, value: string) => {
+    setProfile((prev: any) => ({ ...prev, [field]: value }));
+    const rule = profileValidators[field as keyof typeof profileValidators];
     if (rule) {
       const err = rule(value);
-      setErrors((prev) => ({ ...prev, [name]: err }));
+      setErrors((prev) => ({ ...prev, [field]: err }));
     }
   };
 
@@ -72,12 +102,13 @@ export const useProfileForm = (initialProfile: any, id: string) => {
    * - 全項目をバリデーションしてから API に PUT する
    */
   const handleSubmit = async () => {
-    if (!validateAll(profile)) {
+    if (!validateAll(profile, name)) {
       alert('入力内容に誤りがあります。修正してください。');
       return;
     }
 
     const payload = {
+      name,
       ...profile,
       links: profile.links ?? [],
       tags: profile.tags ?? [],
@@ -146,9 +177,11 @@ export const useProfileForm = (initialProfile: any, id: string) => {
   };
 
   return {
+    name,
     profile,
     errors,
     preview,
+    handleNameChange,
     handleChange,
     handleLinkChange,
     handleTagChange,
