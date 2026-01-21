@@ -68,7 +68,7 @@ export default function SideNav() {
               <button
                 key={item.label}
                 type="button"
-                onClick={() => signOut({ callbackUrl: '/api/auth/signin' })}
+                onClick={() => signOut({ callbackUrl: '/login' })}
                 className={baseClass}
               >
                 {item.icon}
