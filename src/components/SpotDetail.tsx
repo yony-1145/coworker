@@ -57,8 +57,9 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
             <Link
               href={`/users/${user.id}`}
               className="text-blue-600 hover:underline"
-            ></Link>
-            {user.name}
+            >
+              {user.name}
+            </Link>
             <span className="ml-2 text-gray-400 text-xs">
               （{new Date(createdAt).toLocaleDateString()} 投稿）
             </span>

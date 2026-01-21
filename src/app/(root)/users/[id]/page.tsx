@@ -1,37 +1,54 @@
 import Link from 'next/link';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
-interface UserProfile {
+type UserProfile = {
   id: string;
+  userId: string;
   displayName: string;
-  iconUrl?: string;
-  headline?: string;
-  occupation?: string;
-  affiliation?: string;
-  location?: string;
-  age?: number;
-  links?: string[];
-  bioText?: string;
-  tags?: string[];
+  iconUrl?: string | null;
+  headline?: string | null;
+  occupation?: string | null;
+  affiliation?: string | null;
+  location?: string | null;
+  age?: number | null;
+  links?: unknown;
+  bioText?: string | null;
+  tags?: unknown;
+};
+
+type UserResponse = {
+  id: string;
+  name: string;
+  image?: string | null;
+  profile?: UserProfile | null;
+};
+
+function safeHostname(url: string): string {
+  try {
+    return new URL(url).hostname.replace('www.', '');
+  } catch {
+    return url;
+  }
 }
+
 export default async function UserProfilePage({
   params,
 }: {
   params: { id: string };
 }) {
   const { id } = params;
+
   const session = await getServerSession(authOptions);
-  const isOwner = session?.user?.id === params.id;
+  const isOwner = session?.user?.id === id;
+
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
-  // 相対パスでfetch
   const res = await fetch(`${baseUrl}/api/users/${id}`, {
     cache: 'no-store',
   });
 
   if (!res.ok) {
-    console.error('Failed to fetch user:', res.status, res.statusText);
     return (
       <div className="text-center py-20 text-gray-500">
         ユーザーが見つかりません。
@@ -39,7 +56,16 @@ export default async function UserProfilePage({
     );
   }
 
-  const profile: UserProfile = await res.json();
+  const user: UserResponse = await res.json();
+  const profile = user.profile ?? null;
+
+  const displayName = user.name;
+  const iconSrc = profile?.iconUrl || '/user-icons/cat5.png';
+
+  const links = Array.isArray(profile?.links)
+    ? (profile?.links as string[])
+    : [];
+  const tags = Array.isArray(profile?.tags) ? (profile?.tags as string[]) : [];
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12">
@@ -48,16 +74,17 @@ export default async function UserProfilePage({
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
           <div className="relative w-24 h-24 shrink-0">
             <img
-              src={profile.iconUrl || '/user-icons/cat5.png'}
-              alt={profile.displayName}
+              src={iconSrc}
+              alt={displayName}
               className="w-24 h-24 rounded-full shadow-md border-4 border-white object-cover"
             />
           </div>
+
           <div className="flex-1 space-y-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h1 className="text-2xl font-semibold text-gray-900">
-                  {profile.displayName}
+                  {displayName}
                 </h1>
               </div>
 
@@ -71,7 +98,7 @@ export default async function UserProfilePage({
               )}
             </div>
 
-            {profile.headline && (
+            {profile?.headline && (
               <p className="text-lg text-gray-600 italic border-l-4 border-indigo-200 pl-4">
                 "{profile.headline}"
               </p>
@@ -80,18 +107,18 @@ export default async function UserProfilePage({
         </div>
 
         {/* 自己紹介 */}
-        {(profile.bioText || profile.occupation || profile.affiliation) && (
+        {(profile?.bioText || profile?.occupation || profile?.affiliation) && (
           <section className="border-t pt-4 space-y-3 text-gray-700">
             <h2 className="text-xl font-semibold text-gray-900">自己紹介</h2>
 
-            {(profile.occupation || profile.affiliation) && (
+            {(profile?.occupation || profile?.affiliation) && (
               <p className="text-gray-500">
-                {profile.occupation && `職業: ${profile.occupation} `}
-                {profile.affiliation && `所属: ${profile.affiliation}`}
+                {profile?.occupation && `職業: ${profile.occupation} `}
+                {profile?.affiliation && `所属: ${profile.affiliation}`}
               </p>
             )}
 
-            {profile.bioText && (
+            {profile?.bioText && (
               <p className="text-gray-700 leading-relaxed whitespace-pre-line border-l-4 border-indigo-200 pl-4">
                 {profile.bioText}
               </p>
@@ -100,11 +127,11 @@ export default async function UserProfilePage({
         )}
 
         {/* SNSリンク */}
-        {Array.isArray(profile.links) && profile.links.length > 0 && (
+        {links.length > 0 && (
           <section className="border-t pt-4 space-y-3">
             <h2 className="text-xl font-semibold text-gray-900">SNSリンク</h2>
             <div className="flex flex-col gap-3 mt-3">
-              {profile.links.map((url, i) => (
+              {links.map((url, i) => (
                 <a
                   key={i}
                   href={url}
@@ -113,7 +140,7 @@ export default async function UserProfilePage({
                   className="group flex items-center justify-between rounded-xl border border-gray-200 bg-gradient-to-r from-gray-50 to-white px-5 py-3 shadow-sm hover:from-indigo-50 hover:border-indigo-300 transition-all duration-200"
                 >
                   <span className="text-gray-700 group-hover:text-indigo-700 font-medium truncate">
-                    {new URL(url).hostname.replace('www.', '')}
+                    {safeHostname(url)}
                   </span>
                   <span className="text-gray-400 group-hover:text-indigo-500 text-sm">
                     →
@@ -125,13 +152,13 @@ export default async function UserProfilePage({
         )}
 
         {/* タグ */}
-        {profile.tags && profile.tags.length > 0 && (
+        {tags.length > 0 && (
           <section className="border-t pt-4 space-y-3">
             <h2 className="text-xl font-semibold text-gray-900">
               興味・活動領域
             </h2>
             <div className="flex flex-wrap gap-2">
-              {profile.tags.map((tag) => (
+              {tags.map((tag) => (
                 <span
                   key={tag}
                   className="px-3 py-1.5 bg-gray-50 border border-gray-300 text-gray-700 rounded-full text-sm"
