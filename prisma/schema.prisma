@@ -30,6 +30,18 @@ model UserLocation {
   user      User     @relation(fields: [userId], references: [id])
 }
 
+enum CrowdLevel {
+  LOW
+  MID
+  HIGH
+}
+
+enum SpotGenre {
+  CAFE
+  COWORKING
+  OTHER
+}
+
 model Spot {
   id          String        @id @default(cuid())
   user        User          @relation(fields: [userId], references: [id])
@@ -38,13 +50,41 @@ model Spot {
   description String?
   latitude    Float
   longitude   Float
+  latE5       Int
+  lngE5       Int
   address     String?
+  openingHours String?
+  genre       SpotGenre     @default(CAFE)
+  hasWifi     Boolean       @default(false)
+  hasPower    Boolean       @default(false)
+  hasQuietSpace Boolean     @default(false)
+  hasLargeTable Boolean     @default(false)
+  hasPhoneCallOK Boolean    @default(false)
+  hasMeetingSpace Boolean   @default(false)
+  crowdLevel  CrowdLevel    @default(MID)
   imageUrls   Json?
+  images      SpotImage[]
   tags        SpotTag[]     @relation("SpotsOnTags") // ← リレーション名を明示
   comments    SpotComment[]
   ratings     SpotRating[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
+
+  @@unique([latE5, lngE5])
+  @@index([latE5, lngE5])
+  @@index([hasWifi, hasPower, crowdLevel])
+  @@index([genre])
+}
+
+model SpotImage {
+  id        String   @id @default(cuid())
+  spot      Spot     @relation(fields: [spotId], references: [id], onDelete: Cascade)
+  spotId    String
+  url       String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([spotId])
 }
 
 model SpotTag {
