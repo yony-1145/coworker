@@ -4,11 +4,9 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 export default async function UsersPage() {
   const session = await getServerSession(authOptions);
-  const userId = (session?.user as { id?: string } | undefined)?.id;
-
-  if (!userId) {
-    redirect('/api/auth/signin');
+  const userid = session?.user?.id;
+  if (!session) {
+    redirect(`/login?next=/users`);
   }
-
-  redirect(`/users/${userId}`);
+  redirect(`/users/${session.user.id}`);
 }

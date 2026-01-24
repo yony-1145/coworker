@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { cookies } from 'next/headers';
 
 type UserProfile = {
   id: string;
@@ -38,14 +39,18 @@ export default async function UserProfilePage({
   params: { id: string };
 }) {
   const { id } = await params;
-
   const session = await getServerSession(authOptions);
   const isOwner = session?.user?.id === id;
-
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+  const cookie = await cookies();
+  const cookieHeader = cookie.toString();
 
   const res = await fetch(`${baseUrl}/api/users/${id}`, {
     cache: 'no-store',
+    headers: {
+      cookie: cookieHeader,
+    },
   });
 
   if (!res.ok) {

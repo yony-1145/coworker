@@ -21,7 +21,13 @@ export async function GET(
   { params }: { params: { id: string } },
 ) {
   try {
-    // 指定された userId のユーザー情報を取得
+    // 未ログインアクセスを拒否
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // 指定された userId のユーザー情報を取得（本人・他人どちらのプロフィールも取得可能
     const user = await prisma.user.findUnique({
       where: { id: params.id },
       select: {
