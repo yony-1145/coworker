@@ -2,13 +2,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 /**
  * スポット投稿（POST）用の入力スキーマ
  * - API側で型・必須項目・制約を保証する
  */
 const SpotPostSchema = z.object({
-  userId: z.string().min(1), // 要修正
   title: z.string().trim().min(1).max(80),
   description: z.string().trim().max(2000).optional().nullable(),
   latitude: z.coerce.number().min(-90).max(90),
@@ -44,7 +45,7 @@ function ok(data: unknown, status = 200) {
 function err(code: string, message: string, status = 400, details?: unknown) {
   return NextResponse.json(
     { ok: false, error: { code, message, details } },
-    { status }
+    { status },
   );
 }
 
@@ -86,6 +87,12 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
   try {
+    // 認証チェック
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return err('UNAUTHORIZED', 'Login required', 401);
+    }
+
     const body = await req.json();
 
     // リクエストボディ検証
@@ -95,21 +102,18 @@ export async function POST(req: Request) {
         'VALIDATION_ERROR',
         'Invalid request body',
         400,
-        parsed.error.flatten()
+        parsed.error.flatten(),
       );
     }
 
     const v = parsed.data;
     const tags = normalizeTags(v.tags);
-
-    // ユーザーがDBに存在するか確認
-    const user = await prisma.user.findUnique({ where: { id: v.userId } });
-    if (!user) return err('USER_NOT_FOUND', 'User not found', 400);
+    const userId = session.user.id;
 
     // スポットを作成
     const newSpot = await prisma.spot.create({
       data: {
-        userId: v.userId,
+        userId: userId,
         title: v.title.trim(),
         description: v.description?.trim() ?? null,
         latitude: v.latitude,
