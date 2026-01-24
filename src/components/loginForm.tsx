@@ -2,10 +2,13 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get('next') || '/map';
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -24,7 +27,7 @@ export default function LoginForm() {
       return;
     }
 
-    router.replace('/map');
+    router.replace(next);
   };
 
   return (
@@ -34,6 +37,12 @@ export default function LoginForm() {
         className="w-full max-w-sm rounded-lg bg-white p-6 shadow-md"
       >
         <h1 className="mb-6 text-center text-2xl font-semibold">ログイン</h1>
+
+        {searchParams.get('next') && (
+          <p className="mb-4 text-sm text-red-600 text-center">
+            続行するにはログインが必要です
+          </p>
+        )}
 
         {error && (
           <p className="mb-4 text-sm text-red-600 text-center">{error}</p>
