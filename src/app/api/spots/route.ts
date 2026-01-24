@@ -15,6 +15,15 @@ const SpotPostSchema = z.object({
   latitude: z.coerce.number().min(-90).max(90),
   longitude: z.coerce.number().min(-180).max(180),
   address: z.string().trim().max(255).optional().nullable(),
+  openingHours: z.string().trim().max(100).optional().nullable(),
+  genre: z.enum(['CAFE', 'COWORKING', 'OTHER']).optional(),
+  hasWifi: z.boolean().optional(),
+  hasPower: z.boolean().optional(),
+  hasQuietSpace: z.boolean().optional(),
+  hasLargeTable: z.boolean().optional(),
+  hasPhoneCallOK: z.boolean().optional(),
+  hasMeetingSpace: z.boolean().optional(),
+  crowdLevel: z.enum(['LOW', 'MID', 'HIGH']).optional(),
   imageUrls: z.array(z.string().url()).optional().nullable(),
   tags: z.array(z.string()).optional().nullable(),
 });
@@ -110,6 +119,10 @@ export async function POST(req: Request) {
     const tags = normalizeTags(v.tags);
     const userId = session.user.id;
 
+    // latE5/lngE5を計算（E5形式: 座標 * 1e5）
+    const latE5 = Math.round(v.latitude * 1e5);
+    const lngE5 = Math.round(v.longitude * 1e5);
+
     // スポットを作成
     const newSpot = await prisma.spot.create({
       data: {
@@ -118,8 +131,19 @@ export async function POST(req: Request) {
         description: v.description?.trim() ?? null,
         latitude: v.latitude,
         longitude: v.longitude,
+        latE5: latE5,
+        lngE5: lngE5,
         address: v.address?.trim() ?? null,
-        imageUrls: v.imageUrls ?? [],
+        openingHours: v.openingHours?.trim() ?? null,
+        genre: v.genre ?? 'CAFE',
+        hasWifi: v.hasWifi ?? false,
+        hasPower: v.hasPower ?? false,
+        hasQuietSpace: v.hasQuietSpace ?? false,
+        hasLargeTable: v.hasLargeTable ?? false,
+        hasPhoneCallOK: v.hasPhoneCallOK ?? false,
+        hasMeetingSpace: v.hasMeetingSpace ?? false,
+        crowdLevel: v.crowdLevel ?? 'MID',
+        imageUrls: v.imageUrls ?? [], // 既存互換のため残す
         ...(tags.length > 0
           ? {
               tags: {
@@ -134,8 +158,36 @@ export async function POST(req: Request) {
       include: { tags: { select: { name: true } } },
     });
 
-    return ok({ spot: newSpot }, 201);
-  } catch {
+    // 画像をSpotImageテーブルに保存（複数対応）
+    if (v.imageUrls && v.imageUrls.length > 0) {
+      await prisma.spotImage.createMany({
+        data: v.imageUrls.map((url, index) => ({
+          spotId: newSpot.id,
+          url: url,
+          sortOrder: index,
+        })),
+      });
+    }
+
+    // 作成したSpotを再取得（imagesを含む）
+    const spotWithImages = await prisma.spot.findUnique({
+      where: { id: newSpot.id },
+      include: {
+        tags: { select: { name: true } },
+        images: { orderBy: { sortOrder: 'asc' } },
+      },
+    });
+
+    return ok({ spot: spotWithImages }, 201);
+  } catch (error: any) {
+    // Prismaのunique制約エラー(P2002)を捕捉
+    if (error?.code === 'P2002') {
+      return err(
+        'DUPLICATE_SPOT',
+        'A spot with the same coordinates already exists',
+        409,
+      );
+    }
     return err('INTERNAL_ERROR', 'Internal Server Error', 500);
   }
 }
