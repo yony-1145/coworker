@@ -5,7 +5,7 @@ type SpotPageProps = {
 };
 
 export default async function SpotPage({ params }: SpotPageProps) {
-  const { id } = params;
+  const { id } = await params;
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 

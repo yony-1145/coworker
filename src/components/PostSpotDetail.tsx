@@ -16,6 +16,7 @@ export default function SpotDetailsPage() {
   const latitude = parseFloat(params.get('lat') || '0');
   const longitude = parseFloat(params.get('lon') || '0');
   const address = params.get('address') || '';
+  const userId = params.get('userId') || '';
 
   /** 入力値（スポット名・説明・タグ・画像） */
   const [title, setTitle] = useState('');
@@ -102,7 +103,7 @@ export default function SpotDetailsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: 'cmhm5bc6x00019oq40rbmkjle', // TODO: 認証導入後に session.user.id に変更
+          userId: userId,
           title,
           description,
           latitude,
