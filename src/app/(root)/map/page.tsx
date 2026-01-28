@@ -4,11 +4,15 @@ import { useEffect, useState, useMemo, useRef } from 'react';
 import { Map } from 'react-map-gl/maplibre';
 import Pin from '@/components/Pin'; // Pin を共通化
 import Popup from '@/components/Popup'; // Popup を共通化
+import SpotFilters, { type CrowdLevel } from '@/components/spot/SpotFilters';
 
 export default function MapPage() {
   const [spots, setSpots] = useState<any[]>([]);
   const [popupInfo, setPopupInfo] = useState<any | null>(null);
   const mapRef = useRef<any>(null);
+  const [hasWifi, setHasWifi] = useState(false);
+  const [hasPower, setHasPower] = useState(false);
+  const [crowdLevel, setCrowdLevel] = useState<CrowdLevel>('ALL');
 
   const initialView = {
     longitude: 130.6917,
@@ -39,10 +43,20 @@ export default function MapPage() {
     fetchSpots();
   }, []);
 
+  // スポットの絞り込み
+  const filteredSpots = useMemo(() => {
+    return spots.filter((spot: any) => {
+      if (hasWifi && !spot.hasWifi) return false;
+      if (hasPower && !spot.hasPower) return false;
+      if (crowdLevel !== 'ALL' && spot.crowdLevel !== crowdLevel) return false;
+      return true;
+    });
+  }, [spots, hasWifi, hasPower, crowdLevel]);
+
   // --- スポットのピンのみ描画 ---
   const spotPins = useMemo(
     () =>
-      spots.map((spot: any) => {
+      filteredSpots.map((spot: any) => {
         const isSelected =
           popupInfo?.id === spot.id && popupInfo?.type === 'spot';
         return (
@@ -59,31 +73,44 @@ export default function MapPage() {
           />
         );
       }),
-    [spots, popupInfo],
+    [filteredSpots, popupInfo],
   );
 
   return (
     <>
-      <Map
-        ref={mapRef}
-        initialViewState={initialView}
-        mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-      >
-        {/* スポットのピンのみ描画 */}
-        {spotPins}
-
-        {/* Popupに統一 */}
-        {popupInfo && (
-          <Popup
-            type={popupInfo.type}
-            item={popupInfo.type === 'user' ? popupInfo.user : popupInfo}
-            lat={popupInfo.lat ?? popupInfo.latitude}
-            lng={popupInfo.lng ?? popupInfo.longitude}
-            message={popupInfo.message ?? popupInfo.description}
-            onClose={() => setPopupInfo(null)}
+      <div className="relative h-screen w-full">
+        <div className="absolute left-4 top-4 z-10 rounded p-3">
+          <SpotFilters
+            hasWifi={hasWifi}
+            hasPower={hasPower}
+            crowdLevel={crowdLevel}
+            onChangeHasWifi={setHasWifi}
+            onChangeHasPower={setHasPower}
+            onChangeCrowdLevel={setCrowdLevel}
           />
-        )}
-      </Map>
+        </div>
+        <Map
+          ref={mapRef}
+          initialViewState={initialView}
+          mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+          style={{ width: '100%', height: '100%' }}
+        >
+          {/* スポットのピンのみ描画 */}
+          {spotPins}
+
+          {/* Popupに統一 */}
+          {popupInfo && (
+            <Popup
+              type={popupInfo.type}
+              item={popupInfo.type === 'user' ? popupInfo.user : popupInfo}
+              lat={popupInfo.lat ?? popupInfo.latitude}
+              lng={popupInfo.lng ?? popupInfo.longitude}
+              message={popupInfo.message ?? popupInfo.description}
+              onClose={() => setPopupInfo(null)}
+            />
+          )}
+        </Map>
+      </div>
     </>
   );
 }
