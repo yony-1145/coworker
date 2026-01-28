@@ -58,6 +58,8 @@ export default function SpotDetailsPage() {
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     setImageFiles(files);
+    // input要素のvalueをリセット（同じファイルを再度選択できるようにする）
+    e.target.value = '';
   };
 
   /**
@@ -92,7 +94,6 @@ export default function SpotDetailsPage() {
       /** 保存時に画像アップロード（複数対応） */
       let imageUrls: string[] = [];
       if (imageFiles.length > 0) {
-        // 複数画像を順次アップロード
         for (const file of imageFiles) {
           const formData = new FormData();
           formData.append('file', file);
@@ -156,7 +157,14 @@ export default function SpotDetailsPage() {
         return;
       }
 
-      router.push('/map');
+      // 投稿成功時、登録したスポットの位置をクエリパラメータとして渡す
+      const spot = data?.spot;
+      if (spot?.latitude && spot?.longitude) {
+        router.push(`/map?lat=${spot.latitude}&lng=${spot.longitude}`);
+      } else {
+        // フォールバック: 投稿時に使用した座標を使用
+        router.push(`/map?lat=${latitude}&lng=${longitude}`);
+      }
     } catch (err) {
       console.error(err);
       setErrorMessage('投稿に失敗しました');
