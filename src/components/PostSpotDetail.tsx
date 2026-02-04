@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { TagsField } from '@/components/TagsField';
 
 /**
  * SpotDetailsPage
- * Step2：選択した位置情報にもとづき、スポット情報（名称・説明・タグ・画像）を入力して登録する画面。
+ * Step2：選択した位置情報にもとづき、スポット情報を入力して登録する画面。
  */
 export default function SpotDetailsPage() {
   const router = useRouter();
@@ -16,15 +15,22 @@ export default function SpotDetailsPage() {
   const latitude = parseFloat(params.get('lat') || '0');
   const longitude = parseFloat(params.get('lon') || '0');
   const address = params.get('address') || '';
-  const userId = params.get('userId') || '';
 
-  /** 入力値（スポット名・説明・タグ・画像） */
+  /** 入力値 */
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [tags, setTags] = useState<string[]>([]);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [genre, setGenre] = useState<'CAFE' | 'COWORKING' | 'OTHER'>('CAFE');
+  const [hasWifi, setHasWifi] = useState(false);
+  const [hasPower, setHasPower] = useState(false);
+  const [hasQuietSpace, setHasQuietSpace] = useState(false);
+  const [hasLargeTable, setHasLargeTable] = useState(false);
+  const [hasPhoneCallOK, setHasPhoneCallOK] = useState(false);
+  const [hasMeetingSpace, setHasMeetingSpace] = useState(false);
+  const [crowdLevel, setCrowdLevel] = useState<'LOW' | 'MID' | 'HIGH'>('MID');
+  const [openingHours, setOpeningHours] = useState('');
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   /**
    * 画像プレビュー用の一時URLを管理する（選び直し/離脱時に破棄）
@@ -32,26 +38,35 @@ export default function SpotDetailsPage() {
    * - 不要になったURLは revokeObjectURL で破棄してメモリリークを防ぐ
    */
   useEffect(() => {
-    if (!imageFile) {
-      setPreviewUrl(null);
+    if (imageFiles.length === 0) {
+      setPreviewUrls([]);
       return;
     }
 
-    const url = URL.createObjectURL(imageFile);
-    setPreviewUrl(url);
+    const urls = imageFiles.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(urls);
 
     return () => {
-      URL.revokeObjectURL(url);
+      urls.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [imageFile]);
+  }, [imageFiles]);
 
   /**
-   * 画像選択
+   * 画像選択（複数対応）
    * - この時点ではStorageへアップロードしない（保存時にまとめて行う）
    */
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] ?? null;
-    setImageFile(file);
+    const files = Array.from(e.target.files || []);
+    setImageFiles(files);
+    // input要素のvalueをリセット（同じファイルを再度選択できるようにする）
+    e.target.value = '';
+  };
+
+  /**
+   * 画像を削除
+   */
+  const removeImage = (index: number) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   /**
@@ -60,42 +75,49 @@ export default function SpotDetailsPage() {
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
 
     if (!title.trim()) {
-      alert('スポット名を入力してください');
+      setErrorMessage('スポット名を入力してください');
+      return;
+    }
+
+    // 営業時間の最大文字数チェック
+    if (openingHours && openingHours.length > 100) {
+      setErrorMessage('営業時間は100文字以内で入力してください');
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      /** タグの整形（空白削除・空要素除去） */
-      const formattedTags = tags
-        .map((t) => t.trim())
-        .filter((t) => t.length > 0);
-
-      /** 保存時に画像アップロード（任意） */
+      /** 保存時に画像アップロード（複数対応） */
       let imageUrls: string[] = [];
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append('file', imageFile);
-        formData.append('type', 'spot');
+      if (imageFiles.length > 0) {
+        for (const file of imageFiles) {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('type', 'spot');
 
-        const uploadRes = await fetch('/api/uploads', {
-          method: 'POST',
-          body: formData,
-        });
+          const uploadRes = await fetch('/api/uploads', {
+            method: 'POST',
+            body: formData,
+          });
 
-        const uploadData = await uploadRes.json().catch(() => null);
+          const uploadData = await uploadRes.json().catch(() => null);
 
-        if (!uploadRes.ok || uploadData?.ok === false) {
-          const msg =
-            uploadData?.error?.message ?? '画像のアップロードに失敗しました';
-          alert(msg);
-          return;
+          if (!uploadRes.ok || uploadData?.ok === false) {
+            const msg =
+              uploadData?.error?.message ?? '画像のアップロードに失敗しました';
+            setErrorMessage(msg);
+            setIsSubmitting(false);
+            return;
+          }
+
+          if (uploadData?.url) {
+            imageUrls.push(uploadData.url);
+          }
         }
-
-        imageUrls = [uploadData.url];
       }
 
       /** API 送信 */
@@ -103,113 +125,290 @@ export default function SpotDetailsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: userId,
-          title,
-          description,
+          title: title.trim(),
           latitude,
           longitude,
-          address,
-          imageUrls,
-          tags: formattedTags,
+          ...(address ? { address: address.trim() } : {}),
+          ...(openingHours.trim() ? { openingHours: openingHours.trim() } : {}),
+          genre,
+          hasWifi,
+          hasPower,
+          hasQuietSpace,
+          hasLargeTable,
+          hasPhoneCallOK,
+          hasMeetingSpace,
+          crowdLevel,
+          ...(imageUrls.length > 0 ? { imageUrls } : {}),
         }),
       });
 
       const data = await res.json().catch(() => null);
 
       if (!res.ok || data?.ok === false) {
-        const msg = data?.error?.message ?? '登録に失敗しました';
-        alert(msg);
+        // エラーメッセージを適切に表示
+        if (res.status === 409) {
+          setErrorMessage('近い場所に既に登録があります');
+        } else if (res.status === 401) {
+          setErrorMessage('ログインしてください');
+        } else {
+          setErrorMessage('投稿に失敗しました');
+        }
+        setIsSubmitting(false);
         return;
       }
 
-      router.push('/map');
+      // 投稿成功時、登録したスポットの位置をクエリパラメータとして渡す
+      const spot = data?.spot;
+      if (spot?.latitude && spot?.longitude) {
+        router.push(`/map?lat=${spot.latitude}&lng=${spot.longitude}`);
+      } else {
+        // フォールバック: 投稿時に使用した座標を使用
+        router.push(`/map?lat=${latitude}&lng=${longitude}`);
+      }
     } catch (err) {
       console.error(err);
-      alert('登録に失敗しました');
-    } finally {
+      setErrorMessage('投稿に失敗しました');
       setIsSubmitting(false);
     }
   };
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
-      <div className="w-full max-w-xl bg-white rounded-2xl shadow-lg p-8 space-y-4">
-        <h1 className="text-xl font-semibold text-gray-800">
-          Step 2 / 2：スポット情報を入力
-        </h1>
+    <main className="flex items-center justify-center min-h-screen bg-gray-50 px-4 py-6">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-sm p-6 md:p-8 space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            スポット情報を入力
+          </h1>
+          <p className="text-sm text-gray-500 mt-0.5">Step 2 / 2</p>
+        </div>
 
-        <h2 className="text-l font-semibold text-gray-900 mt-2">基本情報</h2>
-
+        {/* 住所表示（フォーム外、テキスト表示専用） */}
         {address && (
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-gray-700">住所</p>
-            <p className="text-sm text-gray-500">{address}</p>
+          <div className="pb-1">
+            <p className="text-xs font-medium text-gray-400 mb-0.5">登録場所</p>
+            <p className="text-sm text-gray-700">{address}</p>
           </div>
         )}
 
-        <div className="space-y-1">
-          <label className="block text-sm font-medium text-gray-700">
-            スポット名
+        {/* スポット名（フル幅、下線スタイル） */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            スポット名 <span className="text-red-500">*</span>
           </label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="例：スターバックス 博多駅店"
-            className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-transparent border-0 border-b border-gray-200 focus:outline-none focus:ring-0 focus:border-gray-900 py-2 transition-colors"
+            required
           />
         </div>
 
-        <div className="space-y-1">
-          <label className="block text-sm font-medium text-gray-700">
-            説明
+        {/* ジャンル + 混雑度（2カラム、面スタイル） */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 gap-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              ジャンル
+            </label>
+            <select
+              value={genre}
+              onChange={(e) =>
+                setGenre(e.target.value as 'CAFE' | 'COWORKING' | 'OTHER')
+              }
+              className="w-full bg-gray-50 rounded-lg px-3 py-2 focus:outline-none focus:bg-gray-100 transition-colors"
+            >
+              <option value="CAFE">カフェ</option>
+              <option value="COWORKING">コワーキングスペース</option>
+              <option value="OTHER">その他</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              混雑度
+            </label>
+            <select
+              value={crowdLevel}
+              onChange={(e) =>
+                setCrowdLevel(e.target.value as 'LOW' | 'MID' | 'HIGH')
+              }
+              className="w-full bg-gray-50 rounded-lg px-3 py-2 focus:outline-none focus:bg-gray-100 transition-colors"
+            >
+              <option value="LOW">空いている</option>
+              <option value="MID">普通</option>
+              <option value="HIGH">混雑している</option>
+            </select>
+          </div>
+        </div>
+
+        {/* 営業時間（フル幅、下線スタイル） */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            営業時間 <span className="text-xs text-gray-400 font-normal">（任意）</span>
           </label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Wi-Fi・電源あり / 落ち着いた雰囲気 など"
-            rows={3}
-            className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+          <input
+            value={openingHours}
+            onChange={(e) => setOpeningHours(e.target.value)}
+            placeholder="9:00-18:00 / 平日 10:00-19:00"
+            maxLength={100}
+            className="w-full bg-transparent border-0 border-b border-gray-200 focus:outline-none focus:ring-0 focus:border-gray-900 py-2 transition-colors"
           />
         </div>
 
-        <div className="pt-4 border-t">
-          <h2 className="text-l font-semibold text-gray-700 mb-2">タグ</h2>
-          <TagsField
-            tags={tags}
-            onChange={setTags}
-            placeholder="例：カフェ"
-            maxTags={10}
-          />
+        {/* 設備（チップUI、横並び＋折り返し） */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            設備
+          </label>
+          <div className="flex flex-wrap gap-2">
+            <label
+              className={`inline-flex items-center cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                hasWifi
+                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={hasWifi}
+                onChange={(e) => setHasWifi(e.target.checked)}
+                className="sr-only"
+              />
+              Wi-Fiあり
+            </label>
+            <label
+              className={`inline-flex items-center cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                hasPower
+                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={hasPower}
+                onChange={(e) => setHasPower(e.target.checked)}
+                className="sr-only"
+              />
+              電源あり
+            </label>
+            <label
+              className={`inline-flex items-center cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                hasQuietSpace
+                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={hasQuietSpace}
+                onChange={(e) => setHasQuietSpace(e.target.checked)}
+                className="sr-only"
+              />
+              静かな空間
+            </label>
+            <label
+              className={`inline-flex items-center cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                hasLargeTable
+                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={hasLargeTable}
+                onChange={(e) => setHasLargeTable(e.target.checked)}
+                className="sr-only"
+              />
+              広いテーブル
+            </label>
+            <label
+              className={`inline-flex items-center cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                hasPhoneCallOK
+                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={hasPhoneCallOK}
+                onChange={(e) => setHasPhoneCallOK(e.target.checked)}
+                className="sr-only"
+              />
+              通話OK
+            </label>
+            <label
+              className={`inline-flex items-center cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                hasMeetingSpace
+                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={hasMeetingSpace}
+                onChange={(e) => setHasMeetingSpace(e.target.checked)}
+                className="sr-only"
+              />
+              ミーティング可
+            </label>
+          </div>
         </div>
 
-        <div className="pt-4 border-t">
-          <h2 className="text-l font-semibold text-gray-700 mb-2">画像</h2>
-
+        {/* 画像アップロード（独立セクション、余白を取る） */}
+        <div className="pt-4">
+          <h2 className="text-base font-semibold text-gray-900 mb-2">画像</h2>
           <label className="block cursor-pointer">
-            <div className="w-full h-44 border border-dashed rounded-lg flex items-center justify-center overflow-hidden hover:bg-gray-50">
-              {previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt="preview"
-                  className="w-full h-full object-cover"
-                />
+            <div className="w-full min-h-[160px] border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center overflow-hidden hover:border-gray-300 hover:bg-gray-50 transition-all p-6">
+              {previewUrls.length > 0 ? (
+                <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {previewUrls.map((url, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={url}
+                        alt={`preview ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg shadow-sm"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
               ) : (
-                <p className="text-sm text-gray-400">クリックして画像を選択</p>
+                <div className="text-center">
+                  <p className="text-sm text-gray-500 mb-1">
+                    クリックして画像を選択
+                  </p>
+                  <p className="text-xs text-gray-400">複数選択可</p>
+                </div>
               )}
             </div>
             <input
               type="file"
               accept="image/*"
+              multiple
               className="hidden"
               onChange={handleImageChange}
             />
           </label>
         </div>
 
+        {/* エラー表示 */}
+        {errorMessage && (
+          <div className="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-3 rounded">
+            {errorMessage}
+          </div>
+        )}
+
+        {/* 送信ボタン */}
         <button
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold py-3 rounded-lg hover:opacity-90 transition disabled:opacity-50"
+          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold py-2 rounded-lg hover:opacity-90 transition disabled:opacity-50"
         >
           {isSubmitting ? '投稿中...' : '投稿する'}
         </button>
