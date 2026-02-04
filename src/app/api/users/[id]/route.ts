@@ -4,15 +4,12 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
 
 /**
- * GET /api/users/[id]
  * ユーザープロフィール取得 API
  *
- * 用途：
- * - ユーザープロフィール表示画面
- * - プロフィール編集画面の初期表示
- *
  * 仕様：
- * - User（アカウント情報）と 紐づくUserProfile（プロフィール情報）をまとめて取得
+ * - 未ログインアクセスを拒否
+ * - 指定された userId のユーザー情報を取得（本人・他人どちらのプロフィールも取得可能）
+ * - User + UserProfile をまとめて返却
  */
 export async function GET(
   req: Request,
@@ -40,8 +37,8 @@ export async function GET(
             headline: true,
             occupation: true,
             affiliation: true,
-            location: true,
-            age: true,
+            // location: true,
+            // age: true,
             links: true,
             tags: true,
             bioText: true,
@@ -65,20 +62,13 @@ export async function GET(
 }
 
 /**
- * PUT /api/users/[id]
  * ユーザープロフィール更新 API
- *
- * 用途：
- * - プロフィール編集画面からの保存処理
  *
  * 仕様：
  * - 表示名は User.name として更新（表示名の正）
  * - その他のプロフィール情報は UserProfile に保存
- * - User / UserProfile を一貫して更新するため transaction を使用
+ * - User / UserProfile を一貫して更新するため transaction を使用\
  *
- * 注意：
- * - UserProfile.displayName は create 時のみ使用（暫定）
- *   将来的にカラム削除予定
  */
 export async function PUT(
   req: Request,
