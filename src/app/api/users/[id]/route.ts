@@ -12,9 +12,7 @@ import { authOptions } from '../../auth/[...nextauth]/route';
  * - プロフィール編集画面の初期表示
  *
  * 仕様：
- * - User（アカウント情報）と UserProfile（プロフィール情報）をまとめて取得
- * - 表示名の正は User.name
- * - パスワードやメールアドレスなどの機密情報は返却しない
+ * - User（アカウント情報）と 紐づくUserProfile（プロフィール情報）をまとめて取得
  */
 export async function GET(
   req: Request,
@@ -119,7 +117,7 @@ export async function PUT(
           occupation: body.occupation ?? null,
           affiliation: body.affiliation ?? null,
           location: body.location ?? null,
-          age: body.age ?? null,
+          // age: body.age ?? null,
           bioText: body.bioText ?? null,
           links: body.links ?? [],
           tags: body.tags ?? [],
@@ -145,8 +143,7 @@ export async function PUT(
     });
 
     return NextResponse.json(result, { status: 200 });
-  } catch (error) {
-    console.error('Failed to update user/profile:', error);
+  } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
