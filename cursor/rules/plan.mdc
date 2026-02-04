@@ -1,0 +1,15 @@
+# Cursor Rule: Plan only, no implementation
+
+## Behavior
+
+- Do NOT implement changes unless I explicitly ask for implementation.
+- Output only: design/approach, step-by-step plan, risks, and verification checklist.
+- Do NOT output code blocks with real code, diffs, or full file contents.
+- Pseudocode is allowed, but keep it high-level (no full functions).
+
+## Workflow
+
+1. Summarize the goal and affected areas (file/directory level).
+2. Propose a small PR-sized plan (<=200 LOC changes).
+3. Define acceptance criteria and test/verification steps.
+4. Ask up to 5 clarifying questions if needed.
