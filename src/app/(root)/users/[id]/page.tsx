@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { cookies } from 'next/headers';
 
+// TODO: 型定義を共通化・修正予定
 type UserProfile = {
   id: string;
   userId: string;
@@ -18,6 +19,7 @@ type UserProfile = {
   tags?: unknown;
 };
 
+// TODO: 型定義を共通化・修正予定
 type UserResponse = {
   id: string;
   name: string;
@@ -25,6 +27,7 @@ type UserResponse = {
   profile?: UserProfile | null;
 };
 
+// Todo:修正予定。ファイル移動、必要有無も要検討
 function safeHostname(url: string): string {
   try {
     return new URL(url).hostname.replace('www.', '');
@@ -33,6 +36,10 @@ function safeHostname(url: string): string {
   }
 }
 
+/**
+ * ユーザープロフィール表示ページ
+ * - 本人の場合のみ編集リンクを表示
+ */
 export default async function UserProfilePage({
   params,
 }: {
@@ -53,7 +60,17 @@ export default async function UserProfilePage({
     },
   });
 
-  if (!res.ok) {
+  const body = await res.json().catch(() => null);
+  if (!res.ok || body?.status === 'error') {
+    return (
+      <div className="text-center py-20 text-gray-500">
+        {body?.message ?? 'ユーザーが見つかりません。'}
+      </div>
+    );
+  }
+
+  const user: UserResponse | null = body?.data?.user ?? null;
+  if (!user) {
     return (
       <div className="text-center py-20 text-gray-500">
         ユーザーが見つかりません。
@@ -61,9 +78,7 @@ export default async function UserProfilePage({
     );
   }
 
-  const user: UserResponse = await res.json();
   const profile = user.profile ?? null;
-
   const displayName = user.name;
   const iconSrc = profile?.iconUrl || '/user-icons/cat5.png';
 

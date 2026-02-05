@@ -22,11 +22,7 @@ export const useProfileForm = (
   );
   const router = useRouter();
 
-  /**
-   * 全項目の一括バリデーション
-   * - profileValidators を全走査し、エラーがある項目だけを errors に格納する
-   * - name は displayName のバリデータを流用して検証する
-   */
+  // ToDo:バリデーションの修正予定
   const validateAll = (p: any, userName: string) => {
     const newErrors: Record<string, string | string[]> = {};
 
@@ -121,11 +117,10 @@ export const useProfileForm = (
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json().catch(() => null);
+      const body = await res.json().catch(() => null);
 
-      if (!res.ok || data?.ok === false) {
-        const msg =
-          data?.error?.message ?? `更新に失敗しました (${res.status})`;
+      if (!res.ok || body?.status === 'error') {
+        const msg = body?.message ?? `更新に失敗しました (${res.status})`;
         throw new Error(msg);
       }
 
@@ -156,16 +151,15 @@ export const useProfileForm = (
         body: formData,
       });
 
-      const uploadData = await uploadRes.json().catch(() => null);
+      const uploadBody = await uploadRes.json().catch(() => null);
 
-      if (!uploadRes.ok || uploadData?.ok === false) {
-        const msg =
-          uploadData?.error?.message ?? '画像のアップロードに失敗しました。';
+      if (!uploadRes.ok || uploadBody?.status === 'error') {
+        const msg = uploadBody?.message ?? '画像のアップロードに失敗しました。';
         alert(msg);
         return;
       }
 
-      const publicUrl: string = uploadData.url;
+      const publicUrl: string = uploadBody?.data?.url ?? '';
 
       setPreview(publicUrl);
       setProfile({ ...profile, iconUrl: publicUrl });

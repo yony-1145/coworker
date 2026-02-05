@@ -2,10 +2,15 @@
 
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { Map } from 'react-map-gl/maplibre';
-import Pin from '@/components/Pin'; // Pin を共通化
-import Popup from '@/components/Popup'; // Popup を共通化
+import Pin from '@/components/Pin';
+import Popup from '@/components/Popup';
 import SpotFilters, { type CrowdLevel } from '@/components/spot/SpotFilters';
 
+/**
+ * 地図ページ
+ * - 地図上でのスポット探索を一画面で完結させる
+ * - 絞り込みと詳細確認を同じ体験内にまとめる
+ */
 export default function MapPage() {
   const [spots, setSpots] = useState<any[]>([]);
   const [popupInfo, setPopupInfo] = useState<any | null>(null);
@@ -20,19 +25,22 @@ export default function MapPage() {
     zoom: 10,
   };
 
-  // --- スポット一覧を取得 ---
   useEffect(() => {
+    /**
+     * スポット一覧を取得し state にセット
+     * - ApiResponse（status / data.spots）で判定
+     */
     const fetchSpots = async () => {
       try {
         const res = await fetch('/api/spots');
-        const data = await res.json();
-        if (data?.ok && Array.isArray(data.spots)) {
-          setSpots(data.spots);
-        } else if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        if (body?.status === 'success' && Array.isArray(body?.data?.spots)) {
+          setSpots(body.data.spots);
+        } else if (body?.status === 'error' || !res.ok) {
           console.error(
             '[Map] Failed to fetch spots:',
             res.status,
-            data?.error?.message ?? res.statusText,
+            body?.message ?? res.statusText,
           );
         }
       } catch (err) {
@@ -43,7 +51,6 @@ export default function MapPage() {
     fetchSpots();
   }, []);
 
-  // スポットの絞り込み
   const filteredSpots = useMemo(() => {
     return spots.filter((spot: any) => {
       if (hasWifi && !spot.hasWifi) return false;
@@ -53,7 +60,6 @@ export default function MapPage() {
     });
   }, [spots, hasWifi, hasPower, crowdLevel]);
 
-  // --- スポットのピンのみ描画 ---
   const spotPins = useMemo(
     () =>
       filteredSpots.map((spot: any) => {
@@ -95,10 +101,7 @@ export default function MapPage() {
           mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
           style={{ width: '100%', height: '100%' }}
         >
-          {/* スポットのピンのみ描画 */}
           {spotPins}
-
-          {/* Popupに統一 */}
           {popupInfo && (
             <Popup
               type={popupInfo.type}

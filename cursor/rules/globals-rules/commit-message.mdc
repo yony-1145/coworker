@@ -1,0 +1,98 @@
+# Code Comment Rules
+
+## Purpose
+
+- Clarify design intent
+- Make future changes and refactoring easier
+- Improve readability and maintainability
+
+---
+
+## Comment Language
+
+- Write comments in Japanese
+
+---
+
+## JSDoc Usage (Public Interface Only)
+
+Use JSDoc for:
+
+- Exported functions
+- React components (default or named export)
+- API route handlers (GET / POST / PUT / DELETE, etc.)
+- Shared utilities used outside the file
+
+Rules:
+
+- Keep within 1–6 lines
+- Describe behavior, responsibility, and constraints
+- Do not describe implementation details
+- Do not use @param or @returns
+
+Example:
+
+/\*\*
+
+- 地図ページ
+- - スポットを取得してピン表示する
+- - フィルタ条件でクライアント側絞り込みを行う
+    \*/
+
+---
+
+## `//` Comments (Internal Logic Only)
+
+Use `//` only for:
+
+- Helper functions inside components
+- Important logic inside useEffect / useMemo
+- Non-obvious design decisions
+- Security, performance, or trade-off explanations
+
+Rules:
+
+- Keep to 1–2 lines
+- Focus on "why", not "what"
+- Do not write line-by-line explanations
+- Do not restate obvious code behavior
+
+Examples:
+
+// APIの成功判定はHTTPだけでなくアプリ側ステータスも確認する
+// レスポンス肥大化防止のためselectで取得項目を限定
+
+---
+
+## Commented-Out Code Policy
+
+- Allowed only if the intent is explicitly documented
+- Must include TODO if scheduled for removal
+- Commented-out code without explanation is prohibited
+
+Allowed:
+
+// TODO: ageカラム削除後に削除予定
+// age: body.age ?? null,
+
+Prohibited:
+
+// age: body.age ?? null,
+
+---
+
+## Prohibited
+
+- Line-by-line explanatory comments
+- Comments that restate the code
+- Temporary debug comments left in the code
+- Excessively long comments
+
+---
+
+## Cursor Instructions
+
+- Add JSDoc to exported functions
+- Use `//` only for non-obvious internal intent
+- Suggest removing redundant comments
+- Suggest removing unexplained commented-out code
