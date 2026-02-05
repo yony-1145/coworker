@@ -1,14 +1,13 @@
-import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { error, success } from '@/lib/apiResponse';
 
 /**
- * POST /api/users
  * サインアップ用 API
  *
+ * 仕様：
  * - 新規ユーザー（User）を作成
  * - 同時に UserProfile も初期状態で作成する
- * - 表示名は User.name を正とする
  */
 export async function POST(req: Request) {
   try {
@@ -21,23 +20,21 @@ export async function POST(req: Request) {
       typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
     const password = typeof body?.password === 'string' ? body.password : '';
 
+    // 入力値のバリデーション
     if (!name || !email || !password) {
-      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+      return error('Invalid input', 400);
     }
 
     // メールアドレス重複チェック
     const exists = await prisma.user.findUnique({ where: { email } });
     if (exists) {
-      return NextResponse.json(
-        { error: 'Email already in use' },
-        { status: 409 },
-      );
+      return error('Email already in use', 409);
     }
 
-    // パスワードは必ずハッシュ化して保存
+    // ハッシュ化
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // ユーザー & プロフィール作成
+    // ユーザーとプロフィール作成
     const user = await prisma.user.create({
       data: {
         name,
@@ -52,7 +49,6 @@ export async function POST(req: Request) {
           },
         },
       },
-      // レスポンスに password を含めない
       select: {
         id: true,
         name: true,
@@ -60,9 +56,9 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json(user, { status: 201 });
-  } catch (error) {
-    console.error('Failed to create user:', error);
-    return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    return success({ user }, 201);
+  } catch (err) {
+    console.error('Failed to create user:', err);
+    return error('Server error', 500);
   }
 }

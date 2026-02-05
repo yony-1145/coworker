@@ -1,13 +1,12 @@
-// src/app/api/spots/route.ts
-import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { error, success } from '@/lib/apiResponse';
 
 /**
  * スポット投稿（POST）用の入力スキーマ
- * - API側で型・必須項目・制約を保証する
+ * - API側でも型・必須項目・制約を保証するためにZodを使用
  */
 const SpotPostSchema = z.object({
   title: z.string().trim().min(1).max(80),
@@ -26,7 +25,7 @@ const SpotPostSchema = z.object({
   crowdLevel: z.enum(['LOW', 'MID', 'HIGH']).optional(),
   imageUrls: z.array(z.string().url()).optional().nullable(),
   tags: z.array(z.string()).optional().nullable(),
-});
+}); // Todo:修正予定、別ファイルに移動
 
 /**
  * タグ配列をDB保存用に正規化する
@@ -42,25 +41,10 @@ function normalizeTags(tags?: string[] | null) {
 }
 
 /**
- * 成功時のレスポンスを返す
- */
-function ok(data: unknown, status = 200) {
-  return NextResponse.json({ ok: true, ...data }, { status });
-}
-
-/**
- * エラー時のレスポンスを返す
- */
-function err(code: string, message: string, status = 400, details?: unknown) {
-  return NextResponse.json(
-    { ok: false, error: { code, message, details } },
-    { status },
-  );
-}
-
-/**
- * GET /api/spots
- * - スポット一覧取得
+ * スポット一覧取得 API
+ *
+ * 仕様：
+ * - スポット一覧を取得
  * - 検索クエリ（q）対応
  */
 export async function GET(req: Request) {
@@ -84,14 +68,17 @@ export async function GET(req: Request) {
       orderBy: { createdAt: 'desc' },
     });
 
-    return ok({ spots });
+    return success({ spots });
   } catch {
-    return err('INTERNAL_ERROR', 'Internal Server Error', 500);
+    return error('Internal Server Error', 500);
   }
 }
 
 /**
- * POST /api/spots
+ * 新規スポット作成 API
+ *
+ * 仕様：
+ * - ログイン必須
  * - 新規スポットを作成する
  */
 export async function POST(req: Request) {
@@ -99,7 +86,7 @@ export async function POST(req: Request) {
     // 認証チェック
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return err('UNAUTHORIZED', 'Login required', 401);
+      return error('Login required', 401);
     }
 
     const body = await req.json();
@@ -107,11 +94,12 @@ export async function POST(req: Request) {
     // リクエストボディ検証
     const parsed = SpotPostSchema.safeParse(body);
     if (!parsed.success) {
-      return err(
-        'VALIDATION_ERROR',
+      const flattened = parsed.error.flatten();
+      return error(
         'Invalid request body',
-        400,
-        parsed.error.flatten(),
+        422,
+        undefined,
+        flattened.fieldErrors as Record<string, string[]>,
       );
     }
 
@@ -119,7 +107,7 @@ export async function POST(req: Request) {
     const tags = normalizeTags(v.tags);
     const userId = session.user.id;
 
-    // latE5/lngE5を計算（E5形式: 座標 * 1e5）
+    // 緯度経度をE5形式に変換、浮動小数による誤差を防ぐために四捨五入
     const latE5 = Math.round(v.latitude * 1e5);
     const lngE5 = Math.round(v.longitude * 1e5);
 
@@ -178,16 +166,17 @@ export async function POST(req: Request) {
       },
     });
 
-    return ok({ spot: spotWithImages }, 201);
-  } catch (error: any) {
-    // Prismaのunique制約エラー(P2002)を捕捉
-    if (error?.code === 'P2002') {
-      return err(
-        'DUPLICATE_SPOT',
-        'A spot with the same coordinates already exists',
-        409,
-      );
+    return success({ spot: spotWithImages }, 201);
+  } catch (err: unknown) {
+    // Prismaのunique制約エラー(P2002)で重複するスポットを特定
+    if (
+      err &&
+      typeof err === 'object' &&
+      'code' in err &&
+      (err as { code: string }).code === 'P2002'
+    ) {
+      return error('A spot with the same coordinates already exists', 409);
     }
-    return err('INTERNAL_ERROR', 'Internal Server Error', 500);
+    return error('Internal Server Error', 500);
   }
 }

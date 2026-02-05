@@ -1,6 +1,13 @@
-import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { error, success } from '@/lib/apiResponse';
 
+/**
+ * スポット重複チェック API
+ *
+ * 仕様：
+ * - クエリ: title, lat, lon
+ * - 同一タイトルかつ緯度経度が約100m以内に既存スポットがあれば exists: true
+ */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const lat = parseFloat(searchParams.get('lat') || '0');
@@ -8,10 +15,7 @@ export async function GET(req: Request) {
   const title = searchParams.get('title');
 
   if (!title) {
-    return NextResponse.json(
-      { error: 'タイトルが未入力です。' },
-      { status: 400 }
-    );
+    return error('タイトルが未入力です。', 400);
   }
 
   // 緯度経度で近いスポットをチェック（±0.001度 ≒ 約100m）
@@ -23,5 +27,5 @@ export async function GET(req: Request) {
     },
   });
 
-  return NextResponse.json({ exists: !!existing });
+  return success({ exists: !!existing });
 }

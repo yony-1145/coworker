@@ -1,6 +1,13 @@
 import { prisma } from '@/lib/prisma';
-import { NextResponse } from 'next/server';
+import { error, success } from '@/lib/apiResponse';
 
+/**
+ * スポット詳細取得 API
+ *
+ * 仕様：
+ * - 指定IDのスポットを取得
+ * - コメント・評価・平均評価を含む
+ */
 export async function GET(
   _req: Request,
   { params }: { params: { id: string } },
@@ -41,10 +48,7 @@ export async function GET(
     });
 
     if (!spot) {
-      return NextResponse.json(
-        { ok: false, error: { code: 'NOT_FOUND', message: 'Not found' } },
-        { status: 404 },
-      );
+      return error('Not found', 404);
     }
 
     const avgRating =
@@ -57,21 +61,9 @@ export async function GET(
           )
         : null;
 
-    return NextResponse.json({
-      ok: true,
-      spot: { ...spot, avgRating },
-    });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      {
-        ok: false,
-        error: {
-          code: 'INTERNAL_SERVER_ERROR',
-          message: 'Internal Server Error',
-        },
-      },
-      { status: 500 },
-    );
+    return success({ spot: { ...spot, avgRating } });
+  } catch (err) {
+    console.error(err);
+    return error('Internal Server Error', 500);
   }
 }
