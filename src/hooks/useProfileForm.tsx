@@ -1,13 +1,12 @@
 import { useState, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { profileValidators } from '@/lib/validation/profileValidators';
+import { userProfileSchema } from '@/lib/validation/userProfileValidators';
 
 /**
  * プロフィール編集フォーム用のカスタムフック
- * - 状態管理
- * - バリデーション
- * - 送信処理
- * - 画像アップロード処理（/api/uploads 経由）
+
+ * - serProfileSchemaでバリデーション
+
  */
 export const useProfileForm = (
   initialProfile: any,
@@ -22,79 +21,65 @@ export const useProfileForm = (
   );
   const router = useRouter();
 
-  /**
-   * 全項目の一括バリデーション
-   * - profileValidators を全走査し、エラーがある項目だけを errors に格納する
-   * - name は displayName のバリデータを流用して検証する
-   */
-  const validateAll = (p: any, userName: string) => {
+  // name + profile を userProfileSchema で検証し、エラーをフォーム用の形で返す
+  const getValidationErrors = (
+    p: any,
+    userName: string,
+  ): Record<string, string | string[]> => {
+    const payload = {
+      name: userName ?? '',
+      iconUrl: p?.iconUrl ?? null,
+      headline: p?.headline ?? null,
+      occupation: p?.occupation ?? null,
+      affiliation: p?.affiliation ?? null,
+      bioText: p?.bioText ?? null,
+      links: p?.links ?? [],
+      tags: p?.tags ?? [],
+    };
+    const result = userProfileSchema.safeParse(payload);
+    if (result.success) return {};
+    const fieldErrors = result.error.flatten().fieldErrors;
     const newErrors: Record<string, string | string[]> = {};
-
-    for (const [key, rule] of Object.entries(profileValidators)) {
-      if (key === 'displayName') continue;
-      const value = key === 'links' ? (p.links ?? []) : ((p as any)[key] ?? '');
-      const err = rule(value);
-      if (err && (Array.isArray(err) ? err.some(Boolean) : err)) {
-        newErrors[key] = err;
-      }
+    for (const [k, v] of Object.entries(fieldErrors)) {
+      if (!v?.length) continue;
+      newErrors[k] = k === 'links' ? v : v[0];
     }
+    return newErrors;
+  };
 
-    const nameRule = profileValidators.displayName;
-    if (nameRule) {
-      const err = nameRule(userName ?? '');
-      if (err && (Array.isArray(err) ? err.some(Boolean) : err)) {
-        newErrors.name = err as any;
-      }
-    }
-
+  const validateAll = (p: any, userName: string) => {
+    const newErrors = getValidationErrors(p, userName);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   /**
    * 表示名（User.name）の変更＋即時バリデーション
-   * - profileValidators.displayName を流用
    */
   const handleNameChange = (value: string) => {
     setName(value);
-    const rule = profileValidators.displayName;
-    if (rule) {
-      const err = rule(value);
-      setErrors((prev) => ({ ...prev, name: err }));
-    }
+    setErrors(getValidationErrors(profile, value));
   };
 
-  /**
-   * 単項目の変更＋即時バリデーション
-   * - 入力値を更新し、対象項目だけ validators を適用して errors を更新する
-   */
+  //単項目の変更＋即時バリデーション
   const handleChange = (field: string, value: string) => {
-    setProfile((prev: any) => ({ ...prev, [field]: value }));
-    const rule = profileValidators[field as keyof typeof profileValidators];
-    if (rule) {
-      const err = rule(value);
-      setErrors((prev) => ({ ...prev, [field]: err }));
-    }
+    const nextProfile = { ...profile, [field]: value };
+    setProfile(nextProfile);
+    setErrors(getValidationErrors(nextProfile, name));
   };
 
-  /**
-   * SNSリンク配列の更新＋バリデーション
-   * - links の配列を更新し、配列用の validators を適用する
-   */
+  // SNSリンク配列の更新＋バリデーション
   const handleLinkChange = (links: string[]) => {
-    setProfile((prev: any) => ({ ...prev, links }));
-    const linkErrors = profileValidators.links(links);
-    setErrors((prev) => ({ ...prev, links: linkErrors }));
+    const nextProfile = { ...profile, links };
+    setProfile(nextProfile);
+    setErrors(getValidationErrors(nextProfile, name));
   };
 
-  /**
-   * タグ配列の更新＋バリデーション
-   * - tags の配列を更新し、配列用の validators を適用する
-   */
+  // タグ配列の更新＋バリデーション
   const handleTagChange = (tags: string[]) => {
-    setProfile((prev: any) => ({ ...prev, tags }));
-    const tagError = profileValidators.tags(tags);
-    setErrors((prev) => ({ ...prev, tags: tagError }));
+    const nextProfile = { ...profile, tags };
+    setProfile(nextProfile);
+    setErrors(getValidationErrors(nextProfile, name));
   };
 
   /**
@@ -121,11 +106,10 @@ export const useProfileForm = (
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json().catch(() => null);
+      const body = await res.json().catch(() => null);
 
-      if (!res.ok || data?.ok === false) {
-        const msg =
-          data?.error?.message ?? `更新に失敗しました (${res.status})`;
+      if (!res.ok || body?.status === 'error') {
+        const msg = body?.message ?? `更新に失敗しました (${res.status})`;
         throw new Error(msg);
       }
 
@@ -156,16 +140,15 @@ export const useProfileForm = (
         body: formData,
       });
 
-      const uploadData = await uploadRes.json().catch(() => null);
+      const uploadBody = await uploadRes.json().catch(() => null);
 
-      if (!uploadRes.ok || uploadData?.ok === false) {
-        const msg =
-          uploadData?.error?.message ?? '画像のアップロードに失敗しました。';
+      if (!uploadRes.ok || uploadBody?.status === 'error') {
+        const msg = uploadBody?.message ?? '画像のアップロードに失敗しました。';
         alert(msg);
         return;
       }
 
-      const publicUrl: string = uploadData.url;
+      const publicUrl: string = uploadBody?.data?.url ?? '';
 
       setPreview(publicUrl);
       setProfile({ ...profile, iconUrl: publicUrl });

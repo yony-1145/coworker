@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ProfileForm } from '@/components/ProfileForm';
 
+// TODO: UserProfile の型定義を共通化・修正予定
 type UserProfile = {
   id: string;
   userId: string;
@@ -24,16 +25,36 @@ type UserResponse = {
   profile: UserProfile | null;
 };
 
+/**
+ * ユーザープロフィール編集ページ
+ * - 指定IDのユーザープロフィールを取得し、編集フォームを表示
+ * - 取得失敗・不正なレスポンス時はエラー表示
+ */
 export default function UserProfileEditClient({ id }: { id: string }) {
   const [user, setUser] = useState<UserResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    /**
+     * 指定IDのユーザーを取得し state にセット
+     * - ApiResponse（status / data）で判定し、失敗時は user を null に
+     */
     const fetchUser = async () => {
-      const res = await fetch(`/api/users/${id}`, { cache: 'no-store' });
-      const data = await res.json();
-      setUser(data);
-      setLoading(false);
+      try {
+        const res = await fetch(`/api/users/${id}`, { cache: 'no-store' });
+        const body = await res.json().catch(() => null);
+        if (!res.ok || body?.status === 'error') {
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        const data = body?.data?.user ?? null;
+        setUser(data);
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchUser();

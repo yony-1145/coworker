@@ -4,6 +4,10 @@ import { useState, useRef } from 'react';
 import { Map, Marker } from 'react-map-gl/maplibre';
 import { useRouter } from 'next/navigation';
 
+/**
+ * スポット投稿 Step1：住所検索で位置を決め、詳細入力へ進む
+ * - ジオコーディングで候補取得・選択後、Step2 へ遷移
+ */
 export default function PostNew() {
   const router = useRouter();
   const mapRef = useRef<any>(null);
@@ -16,7 +20,7 @@ export default function PostNew() {
     { name: string; latitude: number; longitude: number }[]
   >([]);
 
-  // --- geocode API ---
+  // OpenCage API を呼び出して、住所・店名から緯度経度を取得
   const handleGeocode = async () => {
     try {
       const res = await fetch('/api/geocode', {
@@ -25,42 +29,45 @@ export default function PostNew() {
         body: JSON.stringify({ address }),
       });
 
-      // HTTP エラー（400/500）
       if (!res.ok) {
         console.error('Geocode API HTTP error:', res.status);
         setCandidates([]);
         return;
       }
 
-      let data: any;
-
-      // JSON パース安全化
+      let body: {
+        status?: string;
+        data?: { results?: unknown[] };
+        message?: string;
+      };
       try {
-        data = await res.json();
+        body = await res.json();
       } catch (err) {
         console.error('Failed to parse API JSON:', err);
         setCandidates([]);
         return;
       }
 
-      // API の error フィールドがある場合（住所ゼロ or 外部API不調）
-      if (data.error) {
-        console.warn('Geocode API returned error:', data.error);
+      if (body?.status === 'error') {
+        console.warn('Geocode API returned error:', body?.message);
         setCandidates([]);
         return;
       }
 
-      // 正常パス
-      const results = Array.isArray(data.results) ? data.results : [];
-      setCandidates(results);
+      // 候補を設定
+      const results = Array.isArray(body?.data?.results)
+        ? body.data.results
+        : [];
+      setCandidates(
+        results as { name: string; latitude: number; longitude: number }[],
+      );
     } catch (error) {
-      // fetch がそもそも失敗
       console.error('Geocode fetch failed:', error);
       setCandidates([]);
     }
   };
 
-  // --- 候補選択 ---
+  // 候補を選択した場合、緯度経度・住所を設定し、地図を移動
   const selectCandidate = (lat: number, lon: number, name: string) => {
     setCoords({ latitude: lat, longitude: lon });
     setAddress(name);
@@ -68,7 +75,7 @@ export default function PostNew() {
     mapRef.current?.flyTo({ center: [lon, lat], zoom: 14, duration: 1200 });
   };
 
-  // --- 詳細登録へ遷移 ---
+  // 緯度経度・住所を渡して、Step2 へ遷移へ遷移 ---
   const handleNext = () => {
     if (!coords) {
       alert('住所を入力してください');

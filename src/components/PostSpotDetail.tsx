@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 /**
  * SpotDetailsPage
- * Step2：選択した位置情報にもとづき、スポット情報を入力して登録する画面。
+ * Step2：選択した位置情報にもとづき、スポット情報を入力して登録する画面
  */
 export default function SpotDetailsPage() {
   const router = useRouter();
@@ -104,18 +104,18 @@ export default function SpotDetailsPage() {
             body: formData,
           });
 
-          const uploadData = await uploadRes.json().catch(() => null);
+          const uploadBody = await uploadRes.json().catch(() => null);
 
-          if (!uploadRes.ok || uploadData?.ok === false) {
+          if (!uploadRes.ok || uploadBody?.status === 'error') {
             const msg =
-              uploadData?.error?.message ?? '画像のアップロードに失敗しました';
+              uploadBody?.message ?? '画像のアップロードに失敗しました';
             setErrorMessage(msg);
             setIsSubmitting(false);
             return;
           }
 
-          if (uploadData?.url) {
-            imageUrls.push(uploadData.url);
+          if (uploadBody?.data?.url) {
+            imageUrls.push(uploadBody.data.url);
           }
         }
       }
@@ -142,23 +142,21 @@ export default function SpotDetailsPage() {
         }),
       });
 
-      const data = await res.json().catch(() => null);
+      const body = await res.json().catch(() => null);
 
-      if (!res.ok || data?.ok === false) {
-        // エラーメッセージを適切に表示
+      if (!res.ok || body?.status === 'error') {
         if (res.status === 409) {
           setErrorMessage('近い場所に既に登録があります');
         } else if (res.status === 401) {
           setErrorMessage('ログインしてください');
         } else {
-          setErrorMessage('投稿に失敗しました');
+          setErrorMessage(body?.message ?? '投稿に失敗しました');
         }
         setIsSubmitting(false);
         return;
       }
 
-      // 投稿成功時、登録したスポットの位置をクエリパラメータとして渡す
-      const spot = data?.spot;
+      const spot = body?.data?.spot;
       if (spot?.latitude && spot?.longitude) {
         router.push(`/map?lat=${spot.latitude}&lng=${spot.longitude}`);
       } else {
@@ -244,7 +242,8 @@ export default function SpotDetailsPage() {
         {/* 営業時間（フル幅、下線スタイル） */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            営業時間 <span className="text-xs text-gray-400 font-normal">（任意）</span>
+            営業時間{' '}
+            <span className="text-xs text-gray-400 font-normal">（任意）</span>
           </label>
           <input
             value={openingHours}

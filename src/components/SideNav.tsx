@@ -23,13 +23,6 @@ const navItems = [
   },
   {
     type: 'link',
-    href: '/search',
-    label: '検索',
-    icon: <Search size={18} />,
-    activePrefix: '/search',
-  },
-  {
-    type: 'link',
     href: '/posts/new',
     label: '投稿',
     icon: <MapPinPlus size={18} />,

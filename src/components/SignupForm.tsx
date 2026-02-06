@@ -3,6 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+/**
+ * ユーザー登録フォーム
+ * - POST /api/users で登録し、成功時は /login へ遷移
+ * - エラー時は API の message を表示
+ */
 export default function SignupForm() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -11,6 +16,8 @@ export default function SignupForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // ToDo:APIを呼び出して、ユーザー登録
+  // 関数名の変更必要かも。
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -23,10 +30,14 @@ export default function SignupForm() {
         body: JSON.stringify({ email, password, name }),
       });
 
-      const data = await res.json().catch(() => ({}));
+      const body = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setError((data as any).error || '登録に失敗しました');
+        const msg =
+          body && typeof body === 'object' && 'message' in body
+            ? String((body as { message: unknown }).message)
+            : '登録に失敗しました';
+        setError(msg);
         setLoading(false);
         return;
       }

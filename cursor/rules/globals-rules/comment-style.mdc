@@ -1,0 +1,89 @@
+# Code Comment Rules
+
+## General Principles
+
+- Write comments in Japanese
+- Use JSDoc at the function level by default
+- Explain "why", not "what"
+- Avoid redundant comments
+- Do not use @param or @returns
+
+---
+
+## JSDoc Rules (Default)
+
+- Every function must have a JSDoc comment
+- Describe design intent, constraints, and behavior
+- Keep it within 1–6 lines
+- Do not describe implementation details
+
+Example:
+
+/\*\*
+
+- ユーザープロフィール取得API
+- - 未ログインは401
+- - 本人・他人どちらも取得可能
+    \*/
+
+---
+
+## `//` Comment Rules (Exception Only)
+
+`//` comments are allowed only when explaining:
+
+- Security-related intent
+- Why a transaction is used
+- Performance-related decisions
+- Trade-offs
+- Temporary or transitional handling
+
+Example:
+
+// レスポンス肥大化防止のためselectで項目を限定
+// TODO: カラム削除までの暫定対応
+
+---
+
+## Commented-Out Code Policy
+
+- Allowed only if the intent is explicitly documented
+- Must include a TODO if scheduled for future removal
+- Commented-out code without explanation is prohibited
+
+Allowed:
+
+// TODO: ageカラム削除後に削除予定
+// age: body.age ?? null,
+
+Prohibited:
+
+// age: body.age ?? null,
+
+---
+
+## Prohibited
+
+- Line-by-line explanatory comments
+- Comments that simply restate the code
+- Temporary debug comments left in the code
+
+---
+
+## Cursor Instructions
+
+- Always generate JSDoc for functions
+- Allow `//` only for non-obvious intent
+- Suggest removing unexplained commented-out code
+
+---
+
+## Self-Check Before Writing a Comment
+
+Before adding a comment, ask:
+
+- Would a mid-level engineer understand this without explanation?
+- Does this comment explain intent rather than behavior?
+- If this comment is removed, would future refactoring become risky?
+
+If the answer is "no", do not write the comment.
