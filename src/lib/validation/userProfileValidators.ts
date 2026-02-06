@@ -16,10 +16,12 @@ export const userProfileSchema = z.object({
     .max(20, 'ユーザー名は20文字以内で入力してください'),
   iconUrl: z
     .string()
-    .trim()
-    .url('正しいURLを入力してください') // TODO: 非推奨なやり方、修正必要。
     .optional()
-    .nullable(),
+    .nullable()
+    .refine(
+      (v) => v == null || v === '' || z.string().url().safeParse(v).success,
+      { message: '正しいURLを入力してください' },
+    ),
   headline: z
     .string()
     .trim()
@@ -30,6 +32,12 @@ export const userProfileSchema = z.object({
     .string()
     .trim()
     .max(15, '職業は15文字以内で入力してください')
+    .optional()
+    .nullable(),
+  affiliation: z
+    .string()
+    .trim()
+    .max(15, '所属は15文字以内で入力してください')
     .optional()
     .nullable(),
   bioText: z
@@ -56,7 +64,7 @@ export const userProfileSchema = z.object({
     .nullable(),
 });
 // スキーマから型を生成
-type UserProfile = z.infer<typeof userProfileSchema>;
+export type UserProfile = z.infer<typeof userProfileSchema>;
 
 // userIdを追加したAPIリクエストの型定義・バリデーション
 export const userProfileSchemaAPI = userProfileSchema.extend({
@@ -64,4 +72,4 @@ export const userProfileSchemaAPI = userProfileSchema.extend({
 });
 
 // スキーマから型を生成
-type UserProfileAPI = z.infer<typeof userProfileSchemaAPI>;
+export type UserProfileAPI = z.infer<typeof userProfileSchemaAPI>;

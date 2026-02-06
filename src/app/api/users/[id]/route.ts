@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import { error, success } from '@/lib/apiResponse';
+import { userProfileSchema } from '@/lib/validation/userProfileValidators';
 
 /**
  * ユーザープロフィール取得 API
@@ -83,8 +84,14 @@ export async function PUT(
       return error('Forbidden', 403);
     }
 
-    // フロントから送信された更新データ
-    const body = await req.json();
+    const raw = await req.json();
+    const parsed = userProfileSchema.safeParse(raw);
+    if (!parsed.success) {
+      const msg = parsed.error.flatten().fieldErrors;
+      const first = Object.values(msg).flat().find(Boolean);
+      return error(first ?? '入力内容に誤りがあります', 400);
+    }
+    const body = parsed.data;
 
     // User と UserProfile を同時に更新するため transaction を使用
     const result = await prisma.$transaction(async (tx) => {
@@ -102,22 +109,22 @@ export async function PUT(
           headline: body.headline ?? null,
           occupation: body.occupation ?? null,
           affiliation: body.affiliation ?? null,
-          location: body.location ?? null,
-          // age: body.age ?? null, // Todo:カラムが残っている間の暫定対応
+          // location: ,　TODO:　カラム削除予定
+          // TODO: age カラム削除までの暫定対応
           bioText: body.bioText ?? null,
           links: body.links ?? [],
           tags: body.tags ?? [],
         },
         create: {
           userId: params.id,
-          // displayName Todo:カラムが残っている間の暫定対応
+          // TODO: displayName カラム削除までの暫定対応
           displayName: body.name ?? '',
           iconUrl: body.iconUrl ?? null,
           headline: body.headline ?? null,
           occupation: body.occupation ?? null,
           affiliation: body.affiliation ?? null,
-          location: body.location ?? null,
-          age: body.age ?? null,
+          // location: null,
+          // age: null, // TODO: カラム削除予定
           bioText: body.bioText ?? null,
           links: body.links ?? [],
           tags: body.tags ?? [],

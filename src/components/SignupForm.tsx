@@ -16,7 +16,8 @@ export default function SignupForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // ToDo:APIを呼び出して、ユーザー登録　関数名の変更必要かも。
+  // ToDo:APIを呼び出して、ユーザー登録
+  // 関数名の変更必要かも。
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');

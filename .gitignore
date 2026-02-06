@@ -26,6 +26,7 @@ prisma/dev.db
 # misc
 .DS_Store
 *.pem
+HANDOVER.md
 
 # debug
 npm-debug.log*
