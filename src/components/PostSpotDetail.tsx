@@ -27,6 +27,7 @@ export default function SpotDetailsPage() {
   const [hasMeetingSpace, setHasMeetingSpace] = useState(false);
   const [crowdLevel, setCrowdLevel] = useState<'LOW' | 'MID' | 'HIGH'>('MID');
   const [openingHours, setOpeningHours] = useState('');
+  const [description, setDescription] = useState('');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,6 +89,11 @@ export default function SpotDetailsPage() {
       return;
     }
 
+    if (description && description.length > 300) {
+      setErrorMessage('説明は300文字以内で入力してください');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -126,6 +132,7 @@ export default function SpotDetailsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: title.trim(),
+          ...(description.trim() ? { description: description.trim() } : {}),
           latitude,
           longitude,
           ...(address ? { address: address.trim() } : {}),
@@ -259,6 +266,24 @@ export default function SpotDetailsPage() {
             maxLength={100}
             className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-1.5 text-gray-800 focus:ring-2 focus:ring-indigo-400 transition"
           />
+        </div>
+
+        {/* 説明 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            説明 <span className="text-xs text-gray-400 font-normal">（任意）</span>
+          </label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="作業に向いているポイントや混雑時間など"
+            maxLength={300}
+            rows={4}
+            className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-gray-800 focus:ring-2 focus:ring-indigo-400 transition"
+          />
+          <p className="mt-1 text-xs text-gray-400 text-right">
+            {description.length}/300
+          </p>
         </div>
 
         {/* 設備情報 */}

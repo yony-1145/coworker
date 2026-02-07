@@ -31,6 +31,14 @@ type SpotPopup = {
   hasMeetingSpace?: boolean;
 };
 
+const MESSAGE_LIMIT = 30;
+
+const truncateMessage = (value?: string) => {
+  if (!value) return '';
+  if (value.length <= MESSAGE_LIMIT) return value;
+  return `${value.slice(0, MESSAGE_LIMIT)}…`;
+};
+
 export default function Popup({
   type,
   item,
@@ -41,28 +49,32 @@ export default function Popup({
 }: PopupProps) {
   if (!item) return null;
 
-  const name = type === 'user' ? item?.name : item?.title;
-  const equipment =
-    type === 'spot'
-      ? ([
-          item?.hasWifi && 'Wi-Fiあり',
-          item?.hasPower && '電源あり',
-          item?.hasQuietSpace && '静かな空間',
-          item?.hasLargeTable && '広いテーブル',
-          item?.hasPhoneCallOK && '通話OK',
-          item?.hasMeetingSpace && 'ミーティング可',
-        ].filter(Boolean) as string[])
-      : [];
+  const isUser = type === 'user';
+  const userItem = isUser ? (item as UserPopup) : null;
+  const spotItem = !isUser ? (item as SpotPopup) : null;
 
-  const image =
-    type === 'user'
-      ? (item?.image ?? '/user-icons/default.png')
-      : (item?.imageUrls?.[0] ?? '/spot-icons/default.png');
+  const name = isUser ? userItem?.name : spotItem?.title;
+  const equipment = spotItem
+    ? ([
+        spotItem.hasWifi && 'Wi-Fiあり',
+        spotItem.hasPower && '電源あり',
+        spotItem.hasQuietSpace && '静かな空間',
+        spotItem.hasLargeTable && '広いテーブル',
+        spotItem.hasPhoneCallOK && '通話OK',
+        spotItem.hasMeetingSpace && 'ミーティング可',
+      ].filter(Boolean) as string[])
+    : [];
 
-  const href =
-    type === 'user'
-      ? `/users/${item?.id}`
-      : `/spots/${item?.id}?lat=${item?.latitude}&lng=${item?.longitude}`;
+  const image = isUser
+    ? (userItem?.image ?? '/user-icons/default.png')
+    : (spotItem?.imageUrls?.[0] ?? '/spot-icons/default.png');
+
+  const trimmedMessage = message?.trim() ?? '';
+  const shownMessage = trimmedMessage ? truncateMessage(trimmedMessage) : '';
+
+  const href = isUser
+    ? `/users/${userItem?.id}`
+    : `/spots/${spotItem?.id}?lat=${spotItem?.latitude}&lng=${spotItem?.longitude}`;
 
   return (
     <MapPopup
@@ -84,7 +96,9 @@ export default function Popup({
         />
         <p className="text-sm text-center font-medium">
           <span className="font-semibold">{name ?? type}</span>
-          {message && <span className="block text-xs mt-1">{message}</span>}
+          {shownMessage && (
+            <span className="block text-xs mt-1">{shownMessage}</span>
+          )}
         </p>
         {equipment.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-2 justify-center max-w-[220px]">
