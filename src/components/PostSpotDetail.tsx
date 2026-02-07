@@ -172,7 +172,7 @@ export default function SpotDetailsPage() {
 
   return (
     <main className="flex items-center justify-center min-h-screen bg-gray-50 px-4 py-6">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-sm p-6 md:p-8 space-y-6">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-sm p-6 md:p-8 space-y-8">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">
             スポット情報を入力
@@ -180,32 +180,33 @@ export default function SpotDetailsPage() {
           <p className="text-sm text-gray-500 mt-0.5">Step 2 / 2</p>
         </div>
 
-        {/* 住所表示（フォーム外、テキスト表示専用） */}
+        {/* 住所*/}
         {address && (
-          <div className="pb-1">
-            <p className="text-xs font-medium text-gray-400 mb-0.5">登録場所</p>
+          <div>
+            <p className="block text-sm font-medium text-gray-600 mb-1">
+              登録場所
+            </p>
             <p className="text-sm text-gray-700">{address}</p>
           </div>
         )}
 
         {/* スポット名（フル幅、下線スタイル） */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-600 mb-1">
             スポット名 <span className="text-red-500">*</span>
           </label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="スターバックス 博多駅店"
-            className="w-full bg-transparent border-0 border-b border-gray-200 focus:outline-none focus:ring-0 focus:border-gray-900 py-2 transition-colors"
+            className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-1.5 text-gray-800 focus:ring-2 focus:ring-indigo-400 transition"
             required
           />
         </div>
-
-        {/* ジャンル + 混雑度（2カラム、面スタイル） */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 gap-y-3">
+        {/* ジャンル + 混雑度*/}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-600 mb-1">
               ジャンル
             </label>
             <select
@@ -213,7 +214,7 @@ export default function SpotDetailsPage() {
               onChange={(e) =>
                 setGenre(e.target.value as 'CAFE' | 'COWORKING' | 'OTHER')
               }
-              className="w-full bg-gray-50 rounded-lg px-3 py-2 focus:outline-none focus:bg-gray-100 transition-colors"
+              className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 focus:ring-2 focus:ring-indigo-400 transition"
             >
               <option value="CAFE">カフェ</option>
               <option value="COWORKING">コワーキングスペース</option>
@@ -222,7 +223,8 @@ export default function SpotDetailsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            {/* 混雑度 */}
+            <label className="block text-sm font-medium text-gray-600 mb-1">
               混雑度
             </label>
             <select
@@ -230,7 +232,7 @@ export default function SpotDetailsPage() {
               onChange={(e) =>
                 setCrowdLevel(e.target.value as 'LOW' | 'MID' | 'HIGH')
               }
-              className="w-full bg-gray-50 rounded-lg px-3 py-2 focus:outline-none focus:bg-gray-100 transition-colors"
+              className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 focus:ring-2 focus:ring-indigo-400 transition"
             >
               <option value="LOW">空いている</option>
               <option value="MID">普通</option>
@@ -239,9 +241,9 @@ export default function SpotDetailsPage() {
           </div>
         </div>
 
-        {/* 営業時間（フル幅、下線スタイル） */}
+        {/* 営業時間 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-600 mb-1">
             営業時間{' '}
             <span className="text-xs text-gray-400 font-normal">（任意）</span>
           </label>
@@ -250,15 +252,13 @@ export default function SpotDetailsPage() {
             onChange={(e) => setOpeningHours(e.target.value)}
             placeholder="9:00-18:00 / 平日 10:00-19:00"
             maxLength={100}
-            className="w-full bg-transparent border-0 border-b border-gray-200 focus:outline-none focus:ring-0 focus:border-gray-900 py-2 transition-colors"
+            className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-1.5 text-gray-800 focus:ring-2 focus:ring-indigo-400 transition"
           />
         </div>
 
-        {/* 設備（チップUI、横並び＋折り返し） */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            設備
-          </label>
+        {/* 設備情報 */}
+        <div className="border-t pt-4">
+          <h2 className="text-xl font-semibold mb-3 text-gray-900">設備</h2>
           <div className="flex flex-wrap gap-2">
             <label
               className={`inline-flex items-center cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all ${
@@ -353,9 +353,8 @@ export default function SpotDetailsPage() {
           </div>
         </div>
 
-        {/* 画像アップロード（独立セクション、余白を取る） */}
-        <div className="pt-4">
-          <h2 className="text-base font-semibold text-gray-900 mb-2">画像</h2>
+        <div className="border-t pt-4">
+          <h2 className="text-xl font-semibold mb-3 text-gray-900">画像</h2>
           <label className="block cursor-pointer">
             <div className="w-full min-h-[160px] border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center overflow-hidden hover:border-gray-300 hover:bg-gray-50 transition-all p-6">
               {previewUrls.length > 0 ? (
@@ -379,10 +378,9 @@ export default function SpotDetailsPage() {
                 </div>
               ) : (
                 <div className="text-center">
-                  <p className="text-sm text-gray-500 mb-1">
+                  <p className="text-sm text-gray-500">
                     クリックして画像を選択
                   </p>
-                  <p className="text-xs text-gray-400">複数選択可</p>
                 </div>
               )}
             </div>
@@ -396,19 +394,18 @@ export default function SpotDetailsPage() {
           </label>
         </div>
 
-        {/* エラー表示 */}
-        {errorMessage && (
-          <p className="text-sm text-red-600">{errorMessage}</p>
-        )}
+        {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
 
-        {/* 送信ボタン */}
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold py-2 rounded-lg hover:opacity-90 transition disabled:opacity-50"
-        >
-          {isSubmitting ? '投稿中...' : '投稿する'}
-        </button>
+        <div className="border-t pt-4">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="w-full py-2 rounded-lg text-sm font-medium transition bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:bg-gray-300 disabled:text-gray-600"
+          >
+            {isSubmitting ? '投稿中...' : '投稿する'}
+          </button>
+        </div>
       </div>
     </main>
   );

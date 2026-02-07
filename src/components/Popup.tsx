@@ -22,6 +22,17 @@ export default function Popup({
   if (!item) return null;
 
   const name = type === 'user' ? item?.name : item?.title;
+  const equipment =
+    type === 'spot'
+      ? ([
+          item?.hasWifi && 'Wi-Fiあり',
+          item?.hasPower && '電源あり',
+          item?.hasQuietSpace && '静かな空間',
+          item?.hasLargeTable && '広いテーブル',
+          item?.hasPhoneCallOK && '通話OK',
+          item?.hasMeetingSpace && 'ミーティング可',
+        ].filter(Boolean) as string[])
+      : [];
 
   const image =
     type === 'user'
@@ -55,6 +66,18 @@ export default function Popup({
           <span className="font-semibold">{name ?? type}</span>
           {message && <span className="block text-xs mt-1">{message}</span>}
         </p>
+        {equipment.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2 justify-center max-w-[220px]">
+            {equipment.map((label) => (
+              <span
+                key={label}
+                className="bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 rounded-full font-medium border border-gray-200"
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+        )}
       </Link>
     </MapPopup>
   );
