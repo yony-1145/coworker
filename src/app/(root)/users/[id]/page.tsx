@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { cookies } from 'next/headers';
@@ -93,9 +94,12 @@ export default async function UserProfilePage({
         {/* ヘッダー */}
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
           <div className="relative w-24 h-24 shrink-0">
-            <img
+            <Image
               src={iconSrc}
               alt={displayName}
+              width={96}
+              height={96}
+              unoptimized
               className="w-24 h-24 rounded-full shadow-md border-4 border-white object-cover"
             />
           </div>

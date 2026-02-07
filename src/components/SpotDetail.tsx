@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { Map, Marker } from 'react-map-gl/maplibre';
 import Link from 'next/link';
 
@@ -110,10 +111,13 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
         {urls.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {urls.map((url, i) => (
-              <img
+              <Image
                 key={i}
                 src={url}
                 alt={`${title} ${i + 1}`}
+                width={320}
+                height={128}
+                unoptimized
                 className="w-full h-32 object-cover rounded-lg shadow-sm"
               />
             ))}

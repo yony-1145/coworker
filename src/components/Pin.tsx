@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { Marker } from 'react-map-gl/maplibre';
 
 type PinProps = {
@@ -48,9 +49,12 @@ export default function Pin({
       }}
     >
       <div className="flex flex-col items-center transform -translate-y-1.5">
-        <img
+        <Image
           src={image}
           alt={name ?? type}
+          width={40}
+          height={40}
+          unoptimized
           className="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover cursor-pointer"
         />
         {showName && (

@@ -1,7 +1,8 @@
 'use client';
 
+import Image from 'next/image';
 import { useRef } from 'react';
-import { useProfileForm } from '../hooks/useProfileForm';
+import { useProfileForm, type UserProfileForm } from '../hooks/useProfileForm';
 import { SocialLinksField } from './SocialLinksField';
 import { TagsField } from './TagsField';
 
@@ -12,7 +13,17 @@ import { TagsField } from './TagsField';
  *
  * 表示名は User.name を編集対象とする
  */
-export const ProfileForm = ({ initialProfile, initialUserName, id }: any) => {
+type ProfileFormProps = {
+  initialProfile: UserProfileForm | null;
+  initialUserName: string;
+  id: string;
+};
+
+export const ProfileForm = ({
+  initialProfile,
+  initialUserName,
+  id,
+}: ProfileFormProps) => {
   const {
     name,
     profile,
@@ -52,9 +63,12 @@ export const ProfileForm = ({ initialProfile, initialUserName, id }: any) => {
           className="relative w-24 h-24 cursor-pointer"
           onClick={() => fileInputRef.current?.click()}
         >
-          <img
+          <Image
             src={preview || '/user-icons/default.png'}
             alt={name}
+            width={96}
+            height={96}
+            unoptimized
             className="w-24 h-24 rounded-full shadow-md border-4 border-white object-cover hover:opacity-80 transition"
           />
           <input

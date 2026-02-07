@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Popup as MapPopup } from 'react-map-gl/maplibre';
 
@@ -89,9 +90,12 @@ export default function Popup({
         href={href}
         className="flex flex-col items-center bg-white text-gray-800 rounded-xl shadow-lg p-3 border border-gray-100 cursor-pointer hover:bg-gray-50 transition"
       >
-        <img
+        <Image
           src={image}
           alt={name ?? type}
+          width={56}
+          height={56}
+          unoptimized
           className="w-14 h-14 rounded-full object-cover mb-2"
         />
         <p className="text-sm text-center font-medium">
