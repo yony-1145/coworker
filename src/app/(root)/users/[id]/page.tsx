@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { getServerSession } from 'next-auth/next';
+import type { AuthOptions } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { cookies } from 'next/headers';
 
@@ -47,8 +48,9 @@ export default async function UserProfilePage({
   params: { id: string };
 }) {
   const { id } = await params;
-  const session = await getServerSession(authOptions);
-  const isOwner = session?.user?.id === id;
+  const session = await getServerSession(authOptions as AuthOptions);
+  const sessionUserId = (session?.user as { id?: string } | undefined)?.id;
+  const isOwner = sessionUserId === id;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
   const cookie = await cookies();
