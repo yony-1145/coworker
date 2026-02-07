@@ -28,8 +28,9 @@ export default function SpotDetailsPage() {
   const [crowdLevel, setCrowdLevel] = useState<'LOW' | 'MID' | 'HIGH'>('MID');
   const [openingHours, setOpeningHours] = useState('');
   const [description, setDescription] = useState('');
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [imageItems, setImageItems] = useState<
+    { file: File; url: string; key: string }[]
+  >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -39,18 +40,10 @@ export default function SpotDetailsPage() {
    * - 不要になったURLは revokeObjectURL で破棄してメモリリークを防ぐ
    */
   useEffect(() => {
-    if (imageFiles.length === 0) {
-      setPreviewUrls([]);
-      return;
-    }
-
-    const urls = imageFiles.map((file) => URL.createObjectURL(file));
-    setPreviewUrls(urls);
-
     return () => {
-      urls.forEach((url) => URL.revokeObjectURL(url));
+      imageItems.forEach((item) => URL.revokeObjectURL(item.url));
     };
-  }, [imageFiles]);
+  }, [imageItems]);
 
   /**
    * 画像選択（複数対応）
@@ -58,7 +51,18 @@ export default function SpotDetailsPage() {
    */
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setImageFiles(files);
+    if (files.length === 0) return;
+    setImageItems((prev) => {
+      const seen = new Set(prev.map((item) => item.key));
+      const next = [...prev];
+      for (const file of files) {
+        const key = `${file.name}-${file.size}-${file.lastModified}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        next.push({ file, key, url: URL.createObjectURL(file) });
+      }
+      return next;
+    });
     // input要素のvalueをリセット（同じファイルを再度選択できるようにする）
     e.target.value = '';
   };
@@ -67,7 +71,13 @@ export default function SpotDetailsPage() {
    * 画像を削除
    */
   const removeImage = (index: number) => {
-    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setImageItems((prev) => {
+      const target = prev[index];
+      if (target) {
+        URL.revokeObjectURL(target.url);
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   /**
@@ -99,10 +109,10 @@ export default function SpotDetailsPage() {
     try {
       /** 保存時に画像アップロード（複数対応） */
       const imageUrls: string[] = [];
-      if (imageFiles.length > 0) {
-        for (const file of imageFiles) {
+      if (imageItems.length > 0) {
+        for (const item of imageItems) {
           const formData = new FormData();
-          formData.append('file', file);
+          formData.append('file', item.file);
           formData.append('type', 'spot');
 
           const uploadRes = await fetch('/api/uploads', {
@@ -387,12 +397,12 @@ export default function SpotDetailsPage() {
           <h2 className="text-xl font-semibold mb-3 text-gray-900">画像</h2>
           <label className="block cursor-pointer">
             <div className="w-full min-h-[160px] border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center overflow-hidden hover:border-gray-300 hover:bg-gray-50 transition-all p-6">
-              {previewUrls.length > 0 ? (
+              {imageItems.length > 0 ? (
                 <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {previewUrls.map((url, index) => (
+                  {imageItems.map((item, index) => (
                     <div key={index} className="relative group">
                       <img
-                        src={url}
+                        src={item.url}
                         alt={`preview ${index + 1}`}
                         className="w-full h-32 object-cover rounded-lg shadow-sm"
                       />
