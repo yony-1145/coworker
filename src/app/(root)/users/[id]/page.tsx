@@ -80,7 +80,7 @@ export default async function UserProfilePage({
 
   const profile = user.profile ?? null;
   const displayName = user.name;
-  const iconSrc = profile?.iconUrl || '/user-icons/cat5.png';
+  const iconSrc = profile?.iconUrl || '/user-icons/default.png';
 
   const links = Array.isArray(profile?.links)
     ? (profile?.links as string[])
@@ -117,6 +117,11 @@ export default async function UserProfilePage({
                 </Link>
               )}
             </div>
+            {!profile?.headline && (
+              <p className="text-lg text-gray-600 italic pl-4">
+                編集ボタンから自分だけのプロフィールを作成しましょう
+              </p>
+            )}
 
             {profile?.headline && (
               <p className="text-lg text-gray-600 italic border-l-4 border-indigo-200 pl-4">
@@ -139,7 +144,7 @@ export default async function UserProfilePage({
             )}
 
             {profile?.bioText && (
-              <p className="text-gray-700 leading-relaxed whitespace-pre-line border-l-4 border-indigo-200 pl-4">
+              <p className="text-gray-700 leading-relaxed whitespace-pre-line break-words border-l-4 border-indigo-200 pl-4">
                 {profile.bioText}
               </p>
             )}

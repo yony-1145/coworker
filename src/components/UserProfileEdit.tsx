@@ -64,13 +64,16 @@ export default function UserProfileEditClient({ id }: { id: string }) {
     return <p className="text-center mt-20 text-gray-500">読み込み中...</p>;
   }
 
-  if (!user || !user.profile) {
+  if (!user) {
     return (
       <p className="text-center mt-20 text-gray-500">
         ユーザーが見つかりません。
       </p>
     );
   }
+
+  // プロフィール未作成（初回編集）の場合は空オブジェクトを渡す（PUT で upsert される）
+  const initialProfile = user.profile ?? {};
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12">
@@ -89,7 +92,7 @@ export default function UserProfileEditClient({ id }: { id: string }) {
         </div>
 
         <ProfileForm
-          initialProfile={user.profile}
+          initialProfile={initialProfile}
           initialUserName={user.name}
           id={id}
         />

@@ -53,7 +53,7 @@ export const ProfileForm = ({ initialProfile, initialUserName, id }: any) => {
           onClick={() => fileInputRef.current?.click()}
         >
           <img
-            src={preview || '/user-icons/cat5.png'}
+            src={preview || '/user-icons/default.png'}
             alt={name}
             className="w-24 h-24 rounded-full shadow-md border-4 border-white object-cover hover:opacity-80 transition"
           />
