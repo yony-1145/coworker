@@ -43,7 +43,7 @@ export const userProfileSchema = z.object({
   bioText: z
     .string()
     .trim()
-    .max(300, '自己紹介は文字以内で入力してください')
+    .max(300, '自己紹介は300文字以内で入力してください')
     .optional()
     .nullable(),
   links: z
