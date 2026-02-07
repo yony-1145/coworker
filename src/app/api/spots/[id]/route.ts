@@ -48,7 +48,7 @@ export async function GET(
     });
 
     if (!spot) {
-      return error('Not found', 404);
+      return error('スポットが見つかりません', 404);
     }
 
     const avgRating =
@@ -64,6 +64,6 @@ export async function GET(
     return success({ spot: { ...spot, avgRating } });
   } catch (err) {
     console.error(err);
-    return error('Internal Server Error', 500);
+    return error('サーバーエラーが発生しました', 500);
   }
 }

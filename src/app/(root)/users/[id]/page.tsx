@@ -117,11 +117,6 @@ export default async function UserProfilePage({
                 </Link>
               )}
             </div>
-            {!profile?.headline && (
-              <p className="text-lg text-gray-600 italic pl-4">
-                編集ボタンから自分だけのプロフィールを作成しましょう
-              </p>
-            )}
 
             {profile?.headline && (
               <p className="text-lg text-gray-600 italic border-l-4 border-indigo-200 pl-4">
@@ -130,6 +125,12 @@ export default async function UserProfilePage({
             )}
           </div>
         </div>
+
+        {!profile?.headline && (
+          <p className="text-lg text-gray-600 italic pl-4">
+            編集ボタンから自分だけのプロフィールを作成しましょう
+          </p>
+        )}
 
         {/* 自己紹介 */}
         {(profile?.bioText || profile?.occupation || profile?.affiliation) && (

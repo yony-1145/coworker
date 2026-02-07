@@ -70,7 +70,7 @@ export async function GET(req: Request) {
 
     return success({ spots });
   } catch {
-    return error('Internal Server Error', 500);
+    return error('サーバーエラーが発生しました', 500);
   }
 }
 
@@ -86,7 +86,7 @@ export async function POST(req: Request) {
     // 認証チェック
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return error('Login required', 401);
+      return error('ログインしてください', 401);
     }
 
     const body = await req.json();
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
     if (!parsed.success) {
       const flattened = parsed.error.flatten();
       return error(
-        'Invalid request body',
+        '入力内容が不正です',
         422,
         undefined,
         flattened.fieldErrors as Record<string, string[]>,
@@ -175,8 +175,8 @@ export async function POST(req: Request) {
       'code' in err &&
       (err as { code: string }).code === 'P2002'
     ) {
-      return error('A spot with the same coordinates already exists', 409);
+      return error('近い場所に既に登録があります', 409);
     }
-    return error('Internal Server Error', 500);
+    return error('サーバーエラーが発生しました', 500);
   }
 }

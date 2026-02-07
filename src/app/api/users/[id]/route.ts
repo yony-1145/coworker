@@ -19,7 +19,7 @@ export async function GET(
     // 未ログインアクセスを拒否
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
-      return error('Unauthorized', 401);
+      return error('ログインしてください', 401);
     }
 
     // 指定された userId のユーザー情報を取得（本人・他人どちらのプロフィールも取得可能
@@ -50,14 +50,14 @@ export async function GET(
 
     // 対象ユーザーが存在しない場合
     if (!user) {
-      return error('User not found', 404);
+      return error('ユーザーが見つかりません', 404);
     }
 
     // User + UserProfile をまとめて返却
     return success({ user });
   } catch (err) {
     console.error('Failed to fetch user', err);
-    return error('Server error', 500);
+    return error('サーバーエラーが発生しました', 500);
   }
 }
 
@@ -77,11 +77,11 @@ export async function PUT(
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.id) {
-      return error('Unauthorized', 401);
+      return error('ログインしてください', 401);
     }
 
     if (session.user.id !== params.id) {
-      return error('Forbidden', 403);
+      return error('この操作は許可されていません', 403);
     }
 
     const raw = await req.json();
@@ -137,6 +137,6 @@ export async function PUT(
 
     return success(result);
   } catch {
-    return error('Server error', 500);
+    return error('サーバーエラーが発生しました', 500);
   }
 }

@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   // ログインユーザのみ許可
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
-    return error('Login required', 401);
+    return error('ログインしてください', 401);
   }
 
   // リクエストからファイル・種別を取得
@@ -30,23 +30,23 @@ export async function POST(req: Request) {
 
   // ファイル必須
   if (!(file instanceof File)) {
-    return error('File is required', 400);
+    return error('ファイルを選択してください', 400);
   }
 
   // type: "spot" | "user" のみ許可
   const type = typeof typeRaw === 'string' ? typeRaw : 'spot';
   if (type !== 'spot' && type !== 'user') {
-    return error('type must be "spot" or "user"', 400);
+    return error('type は "spot" または "user" を指定してください', 400);
   }
 
   // 画像のみ許可
   if (!file.type.startsWith('image/')) {
-    return error('Image only', 400);
+    return error('画像ファイルのみアップロードできます', 400);
   }
 
   // サイズ上限 5MB
   if (file.size > 5 * 1024 * 1024) {
-    return error('Max 5MB', 400);
+    return error('ファイルサイズは5MB以内にしてください', 400);
   }
 
   // 保存先バケット・ディレクトリを type で決定（重複回避のため userId_タイムスタンプ.拡張子）
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
 
   if (uploadError) {
     console.error(uploadError);
-    return error('Upload failed', 500);
+    return error('アップロードに失敗しました', 500);
   }
 
   // 公開URLを取得して返却

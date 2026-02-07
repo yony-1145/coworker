@@ -22,13 +22,13 @@ export async function POST(req: Request) {
 
     // 入力値のバリデーション
     if (!name || !email || !password) {
-      return error('Invalid input', 400);
+      return error('入力内容が不正です', 400);
     }
 
     // メールアドレス重複チェック
     const exists = await prisma.user.findUnique({ where: { email } });
     if (exists) {
-      return error('Email already in use', 409);
+      return error('このメールアドレスは既に登録されています', 409);
     }
 
     // ハッシュ化
@@ -59,6 +59,6 @@ export async function POST(req: Request) {
     return success({ user }, 201);
   } catch (err) {
     console.error('Failed to create user:', err);
-    return error('Server error', 500);
+    return error('サーバーエラーが発生しました', 500);
   }
 }

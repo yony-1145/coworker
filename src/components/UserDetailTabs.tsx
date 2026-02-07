@@ -17,7 +17,7 @@ export default function UserDetailTabs({ user }: { user: any }) {
       <div className="flex items-center justify-center p-6 border-b border-gray-100">
         <Image
           src={user.image ?? '/user-icons/default.png'}
-          alt={user.name ?? 'User'}
+          alt={user.name ?? 'ユーザー'}
           width={80}
           height={80}
           className="rounded-full"

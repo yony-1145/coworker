@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -69,6 +70,12 @@ export default function LoginForm() {
         <button className="w-full bg-indigo-600 text-white py-2 rounded">
           ログイン
         </button>
+
+        <p className="mt-4 text-center text-sm text-gray-600">
+          <Link href="/signup" className="text-indigo-600 hover:underline">
+            ユーザー登録はこちらから
+          </Link>
+        </p>
       </form>
     </div>
   );
