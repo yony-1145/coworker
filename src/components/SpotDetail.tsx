@@ -88,10 +88,10 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
   ].filter(Boolean) as string[];
 
   return (
-    <div className="max-w-3xl mx-auto p-4 space-y-8">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12">
+      <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-8 md:p-10 border border-gray-100 space-y-8">
+        <header className="space-y-2">
+          <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
           <p className="text-sm text-gray-500">
             投稿者：
             <Link
@@ -104,10 +104,9 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
               （{new Date(createdAt).toLocaleDateString()} 投稿）
             </span>
           </p>
-        </div>
-      </header>
+        </header>
 
-      <div className="border-t pt-4">
+        <section className="border-t pt-4">
         {urls.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {urls.map((url, i) => (
@@ -120,55 +119,51 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
             ))}
           </div>
         ) : (
-          <div className="w-full min-h-[120px] bg-gray-100 flex items-center justify-center text-gray-400 rounded-lg">
+          <div className="w-full min-h-[140px] bg-gray-100 flex items-center justify-center text-gray-400 rounded-xl">
             画像はありません
           </div>
         )}
-      </div>
+        </section>
 
-      {address && (
-        <div>
-          <p className="block text-sm font-medium text-gray-600 mb-1">
-            登録場所
-          </p>
-          <p className="text-sm text-gray-700">{address}</p>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {genre != null && (
-          <div>
-            <p className="block text-sm font-medium text-gray-600 mb-1">
-              ジャンル
-            </p>
-            <p className="text-sm text-gray-700">
-              {GENRE_LABEL[genre] ?? genre}
-            </p>
-          </div>
+        {address && (
+          <section className="space-y-1">
+            <p className="block text-sm font-medium text-gray-600">登録場所</p>
+            <p className="text-sm text-gray-700">{address}</p>
+          </section>
         )}
-        {crowdLevel != null && (
-          <div>
-            <p className="block text-sm font-medium text-gray-600 mb-1">
-              混雑度
-            </p>
-            <p className="text-sm text-gray-700">
-              {CROWD_LABEL[crowdLevel] ?? crowdLevel}
-            </p>
-          </div>
+
+        <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {genre != null && (
+            <div>
+              <p className="block text-sm font-medium text-gray-600 mb-1">
+                ジャンル
+              </p>
+              <p className="text-sm text-gray-700">
+                {GENRE_LABEL[genre] ?? genre}
+              </p>
+            </div>
+          )}
+          {crowdLevel != null && (
+            <div>
+              <p className="block text-sm font-medium text-gray-600 mb-1">
+                混雑度
+              </p>
+              <p className="text-sm text-gray-700">
+                {CROWD_LABEL[crowdLevel] ?? crowdLevel}
+              </p>
+            </div>
+          )}
+        </section>
+
+        {openingHours != null && openingHours !== '' && (
+          <section className="space-y-1">
+            <p className="block text-sm font-medium text-gray-600">営業時間</p>
+            <p className="text-sm text-gray-700">{openingHours}</p>
+          </section>
         )}
-      </div>
 
-      {openingHours != null && openingHours !== '' && (
-        <div>
-          <p className="block text-sm font-medium text-gray-600 mb-1">
-            営業時間
-          </p>
-          <p className="text-sm text-gray-700">{openingHours}</p>
-        </div>
-      )}
-
-      <div className="border-t pt-4">
-        <h2 className="text-xl font-semibold mb-3 text-gray-900">設備</h2>
+        <section className="border-t pt-4">
+          <h2 className="text-xl font-semibold mb-3 text-gray-900">設備</h2>
         {equipment.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {equipment.map((label) => (
@@ -185,46 +180,47 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
             設備情報が登録されていません。
           </p>
         )}
-      </div>
+        </section>
 
-      <div className="border-t pt-4">
-        <h2 className="text-xl font-semibold mb-3 text-gray-900">説明</h2>
-        <p className="text-sm text-gray-700">
-          {hasDescription ? description : '説明はまだ登録されていません。'}
-        </p>
-      </div>
+        <section className="border-t pt-4 space-y-3">
+          <h2 className="text-xl font-semibold text-gray-900">説明</h2>
+          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line break-words">
+            {hasDescription ? description : '説明はまだ登録されていません。'}
+          </p>
+        </section>
 
-      <div className="border-t pt-4">
-        <h2 className="text-xl font-semibold mb-3 text-gray-900">地図</h2>
-        <div className="h-60 rounded-lg overflow-hidden">
-          <Map
-            initialViewState={{ latitude, longitude, zoom: 15 }}
-            style={{ width: '100%', height: '100%' }}
-            mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-          >
-            <Marker latitude={latitude} longitude={longitude} />
-          </Map>
-        </div>
-      </div>
-
-      <div className="border-t pt-4">
-        <h2 className="text-xl font-semibold mb-3 text-gray-900">コメント</h2>
-        {commentList.length > 0 ? (
-          <div className="space-y-3">
-            {commentList.map((comment) => (
-              <div key={comment.id} className="rounded-md border p-3">
-                <p className="text-sm text-gray-700">{comment.content}</p>
-                <p className="mt-1 text-xs text-gray-500">
-                  {comment.user?.name ?? 'ユーザー'}・
-                  {new Date(comment.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-            ))}
+        <section className="border-t pt-4 space-y-3">
+          <h2 className="text-xl font-semibold text-gray-900">地図</h2>
+          <div className="h-60 rounded-xl overflow-hidden border border-gray-100">
+            <Map
+              initialViewState={{ latitude, longitude, zoom: 15 }}
+              style={{ width: '100%', height: '100%' }}
+              mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+            >
+              <Marker latitude={latitude} longitude={longitude} />
+            </Map>
           </div>
-        ) : (
-          <p className="text-sm text-gray-500">コメントはまだありません。</p>
-        )}
+        </section>
+
+        <section className="border-t pt-4 space-y-3">
+          <h2 className="text-xl font-semibold text-gray-900">コメント</h2>
+          {commentList.length > 0 ? (
+            <div className="space-y-3">
+              {commentList.map((comment) => (
+                <div key={comment.id} className="rounded-xl border p-4">
+                  <p className="text-sm text-gray-700">{comment.content}</p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {comment.user?.name ?? 'ユーザー'}・
+                    {new Date(comment.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500">コメントはまだありません。</p>
+          )}
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
