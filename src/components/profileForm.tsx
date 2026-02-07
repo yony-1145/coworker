@@ -103,7 +103,7 @@ export const ProfileForm = ({ initialProfile, initialUserName, id }: any) => {
               ? 'border-red-400 bg-red-50'
               : 'border-gray-300 bg-gray-50'
           }`}
-          placeholder="例: 地方からWeb開発を発信しています"
+          placeholder="地方でエンジニアをしています"
         />
         {errors.headline && (
           <p className="text-xs text-red-600 mt-1">{errors.headline}</p>
@@ -131,7 +131,7 @@ export const ProfileForm = ({ initialProfile, initialUserName, id }: any) => {
                   ? 'border-red-400 bg-red-50'
                   : 'border-gray-300 bg-gray-50'
               }`}
-              placeholder="例: フリーランスエンジニア"
+              placeholder="Webエンジニア"
             />
             {errors.occupation && (
               <p className="text-xs text-red-600 mt-1">{errors.occupation}</p>
@@ -152,7 +152,7 @@ export const ProfileForm = ({ initialProfile, initialUserName, id }: any) => {
                   ? 'border-red-400 bg-red-50'
                   : 'border-gray-300 bg-gray-50'
               }`}
-              placeholder="例: 個人事業主"
+              placeholder="株式会社エンジニア"
             />
             {errors.affiliation && (
               <p className="text-xs text-red-600 mt-1">{errors.affiliation}</p>

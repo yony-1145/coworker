@@ -19,9 +19,15 @@ export default function PostNew() {
   const [candidates, setCandidates] = useState<
     { name: string; latitude: number; longitude: number }[]
   >([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchReturnedEmpty, setSearchReturnedEmpty] = useState(false);
 
-  // OpenCage API を呼び出して、住所・店名から緯度経度を取得
+  // Nominatim（OSM）で住所・店名から緯度経度を取得
   const handleGeocode = async () => {
+    if (!address.trim() || isSearching) return;
+    setIsSearching(true);
+    setCandidates([]);
+    setSearchReturnedEmpty(false);
     try {
       const res = await fetch('/api/geocode', {
         method: 'POST',
@@ -32,6 +38,7 @@ export default function PostNew() {
       if (!res.ok) {
         console.error('Geocode API HTTP error:', res.status);
         setCandidates([]);
+        setSearchReturnedEmpty(false);
         return;
       }
 
@@ -51,6 +58,7 @@ export default function PostNew() {
       if (body?.status === 'error') {
         console.warn('Geocode API returned error:', body?.message);
         setCandidates([]);
+        setSearchReturnedEmpty(false);
         return;
       }
 
@@ -61,17 +69,20 @@ export default function PostNew() {
       setCandidates(
         results as { name: string; latitude: number; longitude: number }[],
       );
+      setSearchReturnedEmpty(results.length === 0);
     } catch (error) {
       console.error('Geocode fetch failed:', error);
       setCandidates([]);
+    } finally {
+      setIsSearching(false);
     }
   };
 
-  // 候補を選択した場合、緯度経度・住所を設定し、地図を移動
   const selectCandidate = (lat: number, lon: number, name: string) => {
     setCoords({ latitude: lat, longitude: lon });
     setAddress(name);
     setCandidates([]);
+    setSearchReturnedEmpty(false);
     mapRef.current?.flyTo({ center: [lon, lat], zoom: 14, duration: 1200 });
   };
 
@@ -104,24 +115,42 @@ export default function PostNew() {
           <div className="flex space-x-2">
             <input
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="例：博多駅 スターバックス"
+              onChange={(e) => {
+                setAddress(e.target.value);
+                setSearchReturnedEmpty(false);
+              }}
+              placeholder="博多駅 スターバックス"
               className="flex-1 border rounded-lg px-3 py-2"
+              disabled={isSearching}
             />
             <button
               type="button"
               onClick={handleGeocode}
-              className="bg-blue-600 text-white px-4 rounded-lg hover:bg-blue-700"
+              disabled={isSearching || !address.trim()}
+              className="bg-blue-600 text-white px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
             >
-              検索
+              {isSearching ? '検索中...' : '検索'}
             </button>
           </div>
 
+          {searchReturnedEmpty && !isSearching && (
+            <p className="mt-2 text-sm text-red-600">
+              検索結果がありません。地図上をクリックして位置を選択してください。
+            </p>
+          )}
+
           <p className="mt-3 text-xs text-gray-500">
-            地名と店舗名はスペースで区切ると検索精度が上がります。
+            複数の語句はスペースやカンマで区切ると検索が効率化されます。
           </p>
 
-          {candidates.length > 0 && (
+          {isSearching && (
+            <div className="flex items-center gap-2 py-2 text-sm text-blue-600">
+              <span className="inline-block w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              位置を検索しています…
+            </div>
+          )}
+
+          {candidates.length > 0 && !isSearching && (
             <ul className="mt-2 border rounded-md divide-y">
               {candidates.map((c, i) => (
                 <li
@@ -149,9 +178,13 @@ export default function PostNew() {
             }}
             style={{ width: '100%', height: 250 }}
             mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-            onClick={(e) =>
-              setCoords({ latitude: e.lngLat.lat, longitude: e.lngLat.lng })
-            }
+            onClick={(e) => {
+              setCoords({
+                latitude: e.lngLat.lat,
+                longitude: e.lngLat.lng,
+              });
+              setSearchReturnedEmpty(false);
+            }}
           >
             {coords && (
               <Marker

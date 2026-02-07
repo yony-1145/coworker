@@ -196,7 +196,7 @@ export default function SpotDetailsPage() {
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="例：スターバックス 博多駅店"
+            placeholder="スターバックス 博多駅店"
             className="w-full bg-transparent border-0 border-b border-gray-200 focus:outline-none focus:ring-0 focus:border-gray-900 py-2 transition-colors"
             required
           />
@@ -398,9 +398,7 @@ export default function SpotDetailsPage() {
 
         {/* エラー表示 */}
         {errorMessage && (
-          <div className="bg-red-50 border-l-4 border-red-400 text-red-700 px-4 py-3 rounded">
-            {errorMessage}
-          </div>
+          <p className="text-sm text-red-600">{errorMessage}</p>
         )}
 
         {/* 送信ボタン */}

@@ -1,71 +1,95 @@
+import { unstable_cache } from 'next/cache';
 import { error, success } from '@/lib/apiResponse';
+
+const NOMINATIM_FETCH_TIMEOUT_MS = 8000;
+const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org/search';
 
 /**
  * ジオコーディング API
  *
  * 仕様：
- * - 住所・地名を緯度経度に変換（OpenCage API 利用）
+ * - 住所・地名を緯度経度に変換（Nominatim）
+ * - User-Agent は環境変数 GEOCODE_USER_AGENT で指定する（必須）
+ * - 同一クエリは5分間キャッシュ
  * - 画面表示用に検索結果を最大5件返却
- * - 結果が0件の場合でもから配列を返す
  */
 export async function POST(req: Request) {
   try {
     const { address } = await req.json();
 
-    // 住所未入力
     if (!address || typeof address !== 'string' || !address.trim()) {
       return error('住所が未入力です。', 400);
     }
 
-    const apiKey = process.env.OPENCAGE_API_KEY;
-    if (!apiKey) {
-      console.error('Missing OPENCAGE_API_KEY in env');
-      return error('サーバー設定の問題が発生しました。', 500);
+    const trimmed = address.trim();
+
+    const userAgent = (process.env.GEOCODE_USER_AGENT ?? '').trim();
+    if (!userAgent) {
+      return error(
+        'サーバー設定の問題が発生しました。（GEOCODE_USER_AGENT を設定してください）',
+        500,
+      );
     }
 
-    // OpenCage API にリクエスト
-    const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(
-      address.trim(),
-    )}&key=${apiKey}&limit=5&language=ja`;
+    const results = await unstable_cache(
+      async () => {
+        const params = new URLSearchParams({
+          q: trimmed,
+          format: 'json',
+          limit: '5',
+        });
 
-    let ocRes: Response;
-    try {
-      ocRes = await fetch(url);
-    } catch (err) {
-      console.error('OpenCage fetch failed:', err);
-      return error('外部API接続に失敗しました。', 502);
-    }
+        const controller = new AbortController();
+        const timeoutId = setTimeout(
+          () => controller.abort(),
+          NOMINATIM_FETCH_TIMEOUT_MS,
+        );
 
-    const rawText = await ocRes.text();
+        let res: Response;
+        try {
+          res = await fetch(`${NOMINATIM_BASE}?${params.toString()}`, {
+            signal: controller.signal,
+            headers: {
+              'User-Agent': userAgent,
+              'Accept-Language': 'ja',
+            },
+          });
+        } finally {
+          clearTimeout(timeoutId);
+        }
 
-    // レスポンスの型定義
-    let data: {
-      results?: Array<{
-        formatted: string;
-        geometry: { lat: number; lng: number };
-      }>;
-    };
-    try {
-      data = JSON.parse(rawText);
-    } catch (err) {
-      console.error('OpenCage JSON parse error:', err);
-      return error('検索結果を取得できませんでした。', 502);
-    }
+        if (!res.ok) {
+          throw new Error(`Nominatim HTTP ${res.status}`);
+        }
 
-    // 0件の場合は空配列で成功
-    if (!data.results || data.results.length === 0) {
-      return success({ results: [] });
-    }
+        const data = (await res.json()) as Array<{
+          lat: string;
+          lon: string;
+          display_name: string;
+        }>;
 
-    // 緯度経度・表示名に変換
-    const results = data.results.map((r) => ({
-      name: r.formatted,
-      latitude: r.geometry.lat,
-      longitude: r.geometry.lng,
-    }));
+        if (!Array.isArray(data) || data.length === 0) {
+          return [];
+        }
+
+        return data.map((r) => ({
+          name: r.display_name,
+          latitude: parseFloat(r.lat),
+          longitude: parseFloat(r.lon),
+        }));
+      },
+      ['geocode', trimmed],
+      { revalidate: 300 },
+    )();
 
     return success({ results });
   } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      return error(
+        '検索がタイムアウトしました。しばらくしてからお試しください。',
+        504,
+      );
+    }
     console.error('Unexpected server error:', err);
     return error('検索処理に失敗しました。', 500);
   }
