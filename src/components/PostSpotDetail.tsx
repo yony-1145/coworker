@@ -146,7 +146,7 @@ export default function SpotDetailsPage() {
 
       if (!res.ok || body?.status === 'error') {
         if (res.status === 409) {
-          setErrorMessage('近い場所に既に登録があります');
+          setErrorMessage('既にに登録されているスポットです。');
         } else if (res.status === 401) {
           setErrorMessage('ログインしてください');
         } else {
@@ -179,6 +179,11 @@ export default function SpotDetailsPage() {
           </h1>
           <p className="text-sm text-gray-500 mt-0.5">Step 2 / 2</p>
         </div>
+        {errorMessage && (
+          <p className="text-sm text-red-600" role="alert">
+            {errorMessage}
+          </p>
+        )}
 
         {/* 住所*/}
         {address && (
@@ -393,8 +398,6 @@ export default function SpotDetailsPage() {
             />
           </label>
         </div>
-
-        {errorMessage && <p className="text-sm text-red-600">{errorMessage}</p>}
 
         <div className="border-t pt-4">
           <button

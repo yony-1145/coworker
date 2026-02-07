@@ -16,11 +16,13 @@ export default function PostNew() {
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [candidates, setCandidates] = useState<
     { name: string; latitude: number; longitude: number }[]
   >([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchReturnedEmpty, setSearchReturnedEmpty] = useState(false);
+  const [isCheckingDuplicate, setIsCheckingDuplicate] = useState(false);
 
   // Nominatim（OSM）で住所・店名から緯度経度を取得
   const handleGeocode = async () => {
@@ -83,6 +85,7 @@ export default function PostNew() {
     setAddress(name);
     setCandidates([]);
     setSearchReturnedEmpty(false);
+    setFormError(null);
   };
 
   // ピンが設置されたら地図をその位置に寄せてズーム（検索候補選択・地図クリックどちらも）
@@ -96,14 +99,43 @@ export default function PostNew() {
   }, [coords]);
 
   // 緯度経度・住所を渡して、Step2 へ遷移へ遷移 ---
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!coords) {
-      alert('住所を入力してください');
+      setFormError(
+        '住所検索または地図をクリックして、スポットの位置を選択してください。',
+      );
       return;
     }
-    router.push(
-      `/posts/new/details?lat=${coords.latitude}&lon=${coords.longitude}&address=${encodeURIComponent(address)}`,
-    );
+    setFormError(null);
+    setIsCheckingDuplicate(true);
+    try {
+      const params = new URLSearchParams({
+        lat: coords.latitude.toString(),
+        lon: coords.longitude.toString(),
+      });
+      if (address.trim()) {
+        params.set('title', address.trim());
+      }
+
+      const res = await fetch(`/api/spots/exists?${params.toString()}`);
+      const body = await res.json().catch(() => null);
+
+      if (!res.ok || body?.status === 'error') {
+        setFormError(body?.message ?? '重複チェックに失敗しました');
+        return;
+      }
+
+      if (body?.data?.exists) {
+        setFormError('既にに登録されているスポットです。');
+        return;
+      }
+
+      router.push(
+        `/posts/new/details?lat=${coords.latitude}&lon=${coords.longitude}&address=${encodeURIComponent(address)}`,
+      );
+    } finally {
+      setIsCheckingDuplicate(false);
+    }
   };
 
   return (
@@ -127,6 +159,7 @@ export default function PostNew() {
               onChange={(e) => {
                 setAddress(e.target.value);
                 setSearchReturnedEmpty(false);
+                setFormError(null);
               }}
               placeholder="博多駅 スターバックス"
               className="flex-1 border rounded-lg px-3 py-2"
@@ -193,6 +226,7 @@ export default function PostNew() {
                 longitude: e.lngLat.lng,
               });
               setSearchReturnedEmpty(false);
+              setFormError(null);
             }}
           >
             {coords && (
@@ -207,10 +241,16 @@ export default function PostNew() {
 
         <button
           onClick={handleNext}
+          disabled={isCheckingDuplicate}
           className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold py-2 rounded-lg hover:opacity-90 transition"
         >
-          次へ
+          {isCheckingDuplicate ? '重複確認中...' : '次へ'}
         </button>
+        {formError && (
+          <p className="text-sm text-red-600" role="alert">
+            {formError}
+          </p>
+        )}
       </div>
     </main>
   );

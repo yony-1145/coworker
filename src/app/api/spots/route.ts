@@ -175,7 +175,7 @@ export async function POST(req: Request) {
       'code' in err &&
       (err as { code: string }).code === 'P2002'
     ) {
-      return error('近い場所に既に登録があります', 409);
+      return error('既に登録されているスポットです。', 409);
     }
     return error('サーバーエラーが発生しました', 500);
   }
