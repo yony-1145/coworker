@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Map, Marker } from 'react-map-gl/maplibre';
 import { useRouter } from 'next/navigation';
 
@@ -83,8 +83,17 @@ export default function PostNew() {
     setAddress(name);
     setCandidates([]);
     setSearchReturnedEmpty(false);
-    mapRef.current?.flyTo({ center: [lon, lat], zoom: 14, duration: 1200 });
   };
+
+  // ピンが設置されたら地図をその位置に寄せてズーム（検索候補選択・地図クリックどちらも）
+  useEffect(() => {
+    if (!coords) return;
+    mapRef.current?.flyTo({
+      center: [coords.longitude, coords.latitude],
+      zoom: 17,
+      duration: 800,
+    });
+  }, [coords]);
 
   // 緯度経度・住所を渡して、Step2 へ遷移へ遷移 ---
   const handleNext = () => {

@@ -20,9 +20,9 @@ export default function MapPage() {
   const [crowdLevel, setCrowdLevel] = useState<CrowdLevel>('ALL');
 
   const initialView = {
-    longitude: 130.6917,
-    latitude: 33.6917,
-    zoom: 10,
+    longitude: 130.4208,
+    latitude: 33.5904,
+    zoom: 13,
   };
 
   useEffect(() => {
