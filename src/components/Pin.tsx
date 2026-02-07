@@ -3,11 +3,21 @@ import { Marker } from 'react-map-gl/maplibre';
 
 type PinProps = {
   type: 'user' | 'spot';
-  item: any;
+  item: UserPin | SpotPin;
   lat: number;
   lng: number;
   showName?: boolean;
   onClick?: () => void;
+};
+
+type UserPin = {
+  name?: string | null;
+  image?: string | null;
+};
+
+type SpotPin = {
+  title?: string | null;
+  imageUrls?: string[] | null;
 };
 
 export default function Pin({

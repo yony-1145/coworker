@@ -3,10 +3,26 @@
 import { useState } from 'react';
 import Image from 'next/image';
 
-export default function UserDetailTabs({ user }: { user: any }) {
-  const [activeTab, setActiveTab] = useState<'profile' | 'follow' | 'activity'>(
-    'profile'
-  );
+type UserDetail = {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  location?: {
+    message?: string | null;
+    updatedAt?: string | Date | null;
+  } | null;
+};
+
+const tabs = [
+  { key: 'profile', label: 'プロフィール' },
+  { key: 'follow', label: 'フォロー' },
+  { key: 'activity', label: 'アクティビティ' },
+] as const;
+
+type TabKey = (typeof tabs)[number]['key'];
+
+export default function UserDetailTabs({ user }: { user: UserDetail }) {
+  const [activeTab, setActiveTab] = useState<TabKey>('profile');
 
   if (!user)
     return <div className="p-6 text-gray-500">ユーザー情報を読み込み中...</div>;
@@ -30,11 +46,7 @@ export default function UserDetailTabs({ user }: { user: any }) {
 
       {/* --- タブボタン --- */}
       <div className="flex border-b border-gray-200">
-        {[
-          { key: 'profile', label: 'プロフィール' },
-          { key: 'follow', label: 'フォロー' },
-          { key: 'activity', label: 'アクティビティ' },
-        ].map(({ key, label }) => (
+        {tabs.map(({ key, label }) => (
           <button
             key={key}
             className={`flex-1 py-3 text-sm font-medium ${
@@ -42,7 +54,7 @@ export default function UserDetailTabs({ user }: { user: any }) {
                 ? 'border-b-2 border-blue-500 text-blue-600'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
-            onClick={() => setActiveTab(key as any)}
+            onClick={() => setActiveTab(key)}
           >
             {label}
           </button>

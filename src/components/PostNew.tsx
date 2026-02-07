@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Map, Marker } from 'react-map-gl/maplibre';
+import { Map, Marker, type MapRef, type MapLayerMouseEvent } from 'react-map-gl/maplibre';
 import { useRouter } from 'next/navigation';
 
 /**
@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
  */
 export default function PostNew() {
   const router = useRouter();
-  const mapRef = useRef<any>(null);
+  const mapRef = useRef<MapRef | null>(null);
   const [address, setAddress] = useState('');
   const [coords, setCoords] = useState<{
     latitude: number;
@@ -220,7 +220,7 @@ export default function PostNew() {
             }}
             style={{ width: '100%', height: 250 }}
             mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
-            onClick={(e) => {
+            onClick={(e: MapLayerMouseEvent) => {
               setCoords({
                 latitude: e.lngLat.lat,
                 longitude: e.lngLat.lng,

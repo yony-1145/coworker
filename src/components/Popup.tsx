@@ -4,11 +4,31 @@ import { Popup as MapPopup } from 'react-map-gl/maplibre';
 
 type PopupProps = {
   type: 'user' | 'spot';
-  item: any;
+  item: UserPopup | SpotPopup;
   lat: number;
   lng: number;
   message?: string;
   onClose: () => void;
+};
+
+type UserPopup = {
+  id?: string;
+  name?: string | null;
+  image?: string | null;
+};
+
+type SpotPopup = {
+  id?: string;
+  title?: string | null;
+  imageUrls?: string[] | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  hasWifi?: boolean;
+  hasPower?: boolean;
+  hasQuietSpace?: boolean;
+  hasLargeTable?: boolean;
+  hasPhoneCallOK?: boolean;
+  hasMeetingSpace?: boolean;
 };
 
 export default function Popup({

@@ -120,7 +120,7 @@ export default async function UserProfilePage({
 
             {profile?.headline && (
               <p className="text-lg text-gray-600 italic border-l-4 border-indigo-200 pl-4">
-                "{profile.headline}"
+                「{profile.headline}」
               </p>
             )}
           </div>

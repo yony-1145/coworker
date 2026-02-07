@@ -2,6 +2,16 @@ import { useState, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { userProfileSchema } from '@/lib/validation/userProfileValidators';
 
+export type UserProfileForm = {
+  iconUrl?: string | null;
+  headline?: string | null;
+  occupation?: string | null;
+  affiliation?: string | null;
+  bioText?: string | null;
+  links?: string[];
+  tags?: string[];
+};
+
 /**
  * プロフィール編集フォーム用のカスタムフック
 
@@ -9,12 +19,18 @@ import { userProfileSchema } from '@/lib/validation/userProfileValidators';
 
  */
 export const useProfileForm = (
-  initialProfile: any,
+  initialProfile: UserProfileForm | null,
   initialUserName: string,
   id: string,
 ) => {
+  const [notice, setNotice] = useState<{
+    type: 'error' | 'success' | 'info';
+    message: string;
+  } | null>(null);
   const [name, setName] = useState(initialUserName ?? '');
-  const [profile, setProfile] = useState(initialProfile);
+  const [profile, setProfile] = useState<UserProfileForm>(
+    initialProfile ?? { links: [], tags: [] },
+  );
   const [errors, setErrors] = useState<Record<string, string | string[]>>({});
   const [preview, setPreview] = useState<string | null>(
     initialProfile?.iconUrl || null,
@@ -23,7 +39,7 @@ export const useProfileForm = (
 
   // name + profile を userProfileSchema で検証し、エラーをフォーム用の形で返す
   const getValidationErrors = (
-    p: any,
+    p: UserProfileForm,
     userName: string,
   ): Record<string, string | string[]> => {
     const payload = {
@@ -47,7 +63,7 @@ export const useProfileForm = (
     return newErrors;
   };
 
-  const validateAll = (p: any, userName: string) => {
+  const validateAll = (p: UserProfileForm, userName: string) => {
     const newErrors = getValidationErrors(p, userName);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -87,8 +103,12 @@ export const useProfileForm = (
    * - 全項目をバリデーションしてから API に PUT する
    */
   const handleSubmit = async () => {
+    setNotice(null);
     if (!validateAll(profile, name)) {
-      alert('入力内容に誤りがあります。修正してください。');
+      setNotice({
+        type: 'error',
+        message: '入力内容に誤りがあります。修正してください。',
+      });
       return;
     }
 
@@ -113,11 +133,14 @@ export const useProfileForm = (
         throw new Error(msg);
       }
 
-      alert('プロフィールを保存しました');
+      setNotice({ type: 'success', message: 'プロフィールを保存しました。' });
       router.push(`/users/${id}`);
     } catch (err) {
       console.error('Update failed:', err);
-      alert('エラーが発生しました。もう一度お試しください。');
+      setNotice({
+        type: 'error',
+        message: 'エラーが発生しました。もう一度お試しください。',
+      });
     }
   };
 
@@ -129,6 +152,7 @@ export const useProfileForm = (
   const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !profile) return;
+    setNotice(null);
 
     try {
       const formData = new FormData();
@@ -144,7 +168,7 @@ export const useProfileForm = (
 
       if (!uploadRes.ok || uploadBody?.status === 'error') {
         const msg = uploadBody?.message ?? '画像のアップロードに失敗しました。';
-        alert(msg);
+        setNotice({ type: 'error', message: msg });
         return;
       }
 
@@ -152,10 +176,14 @@ export const useProfileForm = (
 
       setPreview(publicUrl);
       setProfile({ ...profile, iconUrl: publicUrl });
-      alert('画像をアップロードしました。保存ボタンを押して確定してください。');
+      setNotice({
+        type: 'info',
+        message:
+          '画像をアップロードしました。保存ボタンを押して確定してください。',
+      });
     } catch (err) {
       console.error('Upload failed:', err);
-      alert('画像のアップロードに失敗しました。');
+      setNotice({ type: 'error', message: '画像のアップロードに失敗しました。' });
     }
   };
 
@@ -164,6 +192,7 @@ export const useProfileForm = (
     profile,
     errors,
     preview,
+    notice,
     handleNameChange,
     handleChange,
     handleLinkChange,

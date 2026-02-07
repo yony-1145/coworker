@@ -92,7 +92,7 @@ export default function SpotDetailsPage() {
 
     try {
       /** 保存時に画像アップロード（複数対応） */
-      let imageUrls: string[] = [];
+      const imageUrls: string[] = [];
       if (imageFiles.length > 0) {
         for (const file of imageFiles) {
           const formData = new FormData();
