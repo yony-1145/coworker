@@ -56,6 +56,7 @@ type SpotDetailProps = {
 export default function SpotDetail({ spot }: SpotDetailProps) {
   const {
     title,
+    description,
     address,
     openingHours,
     genre,
@@ -71,9 +72,12 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
     longitude,
     user,
     createdAt,
+    comments,
   } = spot;
 
   const urls = Array.isArray(imageUrls) ? imageUrls : [];
+  const commentList = Array.isArray(comments) ? comments : [];
+  const hasDescription = Boolean(description && description.trim() !== '');
   const equipment = [
     hasWifi && 'Wi-Fiあり',
     hasPower && '電源あり',
@@ -185,7 +189,9 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
 
       <div className="border-t pt-4">
         <h2 className="text-xl font-semibold mb-3 text-gray-900">説明</h2>
-        <p className="text-sm text-gray-500">説明は現在準備中です。</p>
+        <p className="text-sm text-gray-700">
+          {hasDescription ? description : '説明はまだ登録されていません。'}
+        </p>
       </div>
 
       <div className="border-t pt-4">
@@ -203,7 +209,21 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
 
       <div className="border-t pt-4">
         <h2 className="text-xl font-semibold mb-3 text-gray-900">コメント</h2>
-        <p className="text-sm text-gray-500">コメント機能は現在準備中です。</p>
+        {commentList.length > 0 ? (
+          <div className="space-y-3">
+            {commentList.map((comment) => (
+              <div key={comment.id} className="rounded-md border p-3">
+                <p className="text-sm text-gray-700">{comment.content}</p>
+                <p className="mt-1 text-xs text-gray-500">
+                  {comment.user?.name ?? 'ユーザー'}・
+                  {new Date(comment.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500">コメントはまだありません。</p>
+        )}
       </div>
     </div>
   );

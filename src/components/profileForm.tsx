@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { useProfileForm, type UserProfileForm } from '../hooks/useProfileForm';
+import { useProfileForm } from '../hooks/useProfileForm';
 import { SocialLinksField } from './SocialLinksField';
 import { TagsField } from './TagsField';
 
@@ -12,23 +12,12 @@ import { TagsField } from './TagsField';
  *
  * 表示名は User.name を編集対象とする
  */
-type ProfileFormProps = {
-  initialProfile: UserProfileForm | null;
-  initialUserName: string;
-  id: string;
-};
-
-export const ProfileForm = ({
-  initialProfile,
-  initialUserName,
-  id,
-}: ProfileFormProps) => {
+export const ProfileForm = ({ initialProfile, initialUserName, id }: any) => {
   const {
     name,
     profile,
     preview,
     errors,
-    notice,
     handleNameChange,
     handleChange,
     handleLinkChange,
@@ -57,20 +46,6 @@ export const ProfileForm = ({
       }}
       className="space-y-8 overflow-y-auto max-h-[calc(100vh-180px)] pr-1"
     >
-      {notice && (
-        <div
-          className={`rounded-md border px-3 py-2 text-sm ${
-            notice.type === 'error'
-              ? 'border-red-200 bg-red-50 text-red-700'
-              : notice.type === 'success'
-                ? 'border-green-200 bg-green-50 text-green-700'
-                : 'border-blue-200 bg-blue-50 text-blue-700'
-          }`}
-          role={notice.type === 'error' ? 'alert' : 'status'}
-        >
-          {notice.message}
-        </div>
-      )}
       {/* ヘッダー（画像＋表示名） */}
       <div className="flex items-center gap-6">
         <div
