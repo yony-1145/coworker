@@ -70,7 +70,8 @@ export async function GET(req: Request) {
     });
 
     return success({ spots });
-  } catch {
+  } catch (err: unknown) {
+    console.error('api/spots GET failed', err);
     return error('サーバーエラーが発生しました', 500);
   }
 }
@@ -170,6 +171,7 @@ export async function POST(req: Request) {
 
     return success({ spot: spotWithImages }, 201);
   } catch (err: unknown) {
+    console.error('api/spots POST failed', err);
     // Prismaのunique制約エラー(P2002)で重複するスポットを特定
     if (
       err &&

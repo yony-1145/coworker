@@ -77,7 +77,7 @@ export async function GET(
 
     return success({ spot: { ...spot, avgRating } });
   } catch (err) {
-    console.error(err);
+    console.error('api/spots/[id] GET failed', err);
     return error('サーバーエラーが発生しました', 500);
   }
 }

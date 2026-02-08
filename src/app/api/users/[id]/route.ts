@@ -146,7 +146,8 @@ export async function PUT(
     });
 
     return success(result);
-  } catch {
+  } catch (err) {
+    console.error('Failed to update user', err);
     return error('サーバーエラーが発生しました', 500);
   }
 }
