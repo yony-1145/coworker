@@ -1,3 +1,4 @@
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { error, success } from '@/lib/apiResponse';
 
@@ -9,12 +10,13 @@ import { error, success } from '@/lib/apiResponse';
  * - コメント・評価・平均評価を含む
  */
 export async function GET(
-  _req: Request,
-  { params }: { params: { id: string } },
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const spot = await prisma.spot.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: {
         id: true,
         title: true,
