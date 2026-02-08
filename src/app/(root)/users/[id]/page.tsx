@@ -2,7 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getServerSession } from 'next-auth/next';
 import type { AuthOptions } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import { cookies } from 'next/headers';
 
 // TODO: 型定義を共通化・修正予定

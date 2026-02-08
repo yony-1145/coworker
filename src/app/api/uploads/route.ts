@@ -1,6 +1,6 @@
 import { getServerSession, type AuthOptions } from 'next-auth';
 import { supabaseServer } from '@/lib/supabase/server';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import { error, success } from '@/lib/apiResponse';
 
 function getExtension(filename: string) {

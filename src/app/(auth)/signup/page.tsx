@@ -1,7 +1,7 @@
 // src/app/(auth)/signup/page.tsx
 import { redirect } from 'next/navigation';
 import { getServerSession, type AuthOptions } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import SignupForm from '@/components/SignupForm';
 
 export default async function SignupPage() {

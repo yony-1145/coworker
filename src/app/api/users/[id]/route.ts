@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession, type AuthOptions } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import { error, success } from '@/lib/apiResponse';
 import { userProfileSchema } from '@/lib/validation/userProfileValidators';
 

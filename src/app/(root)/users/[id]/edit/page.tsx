@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth/next';
 import type { AuthOptions } from 'next-auth';
 import { redirect, notFound } from 'next/navigation';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import UserProfileEdit from '@/components/UserProfileEdit';
 
 export default async function UserProfileEditPage({
