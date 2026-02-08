@@ -2,9 +2,7 @@
 import Image from 'next/image';
 import { Marker } from 'react-map-gl/maplibre';
 
-type PinProps = {
-  type: 'user' | 'spot';
-  item: UserPin | SpotPin;
+type BasePinProps = {
   lat: number;
   lng: number;
   showName?: boolean;
@@ -20,6 +18,18 @@ type SpotPin = {
   title?: string | null;
   imageUrls?: string[] | null;
 };
+
+type UserPinProps = BasePinProps & {
+  type: 'user';
+  item: UserPin;
+};
+
+type SpotPinProps = BasePinProps & {
+  type: 'spot';
+  item: SpotPin;
+};
+
+type PinProps = UserPinProps | SpotPinProps;
 
 export default function Pin({
   type,
