@@ -10,13 +10,13 @@ import { error, success } from '@/lib/apiResponse';
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const lat = parseFloat(searchParams.get('lat') || '0');
-  const lon = parseFloat(searchParams.get('lon') || '0');
-  if (Number.isNaN(lat) || Number.isNaN(lon)) {
+  const lng = parseFloat(searchParams.get('lng') || '0');
+  if (Number.isNaN(lat) || Number.isNaN(lng)) {
     return error('緯度経度が不正です。', 400);
   }
 
   const latE5 = Math.round(lat * 1e5);
-  const lngE5 = Math.round(lon * 1e5);
+  const lngE5 = Math.round(lng * 1e5);
 
   // E5一致で重複チェック
   const existing = await prisma.spot.findFirst({
