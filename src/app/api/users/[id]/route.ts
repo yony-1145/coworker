@@ -1,5 +1,6 @@
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
+import { getServerSession, type AuthOptions } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import { error, success } from '@/lib/apiResponse';
 import { userProfileSchema } from '@/lib/validation/userProfileValidators';
@@ -12,19 +13,21 @@ import { userProfileSchema } from '@/lib/validation/userProfileValidators';
  * - User + UserProfile をまとめて返却
  */
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } },
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     // 未ログインアクセスを拒否
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const session = await getServerSession(authOptions as AuthOptions);
+    const userId = (session?.user as { id?: string } | undefined)?.id;
+    if (!userId) {
       return error('ログインしてください', 401);
     }
 
     // 指定された userId のユーザー情報を取得（本人・他人どちらのプロフィールも取得可能
     const user = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: {
         id: true,
         name: true,
@@ -69,18 +72,20 @@ export async function GET(
  *
  */
 export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } },
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     // 更新権限の確認
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions as AuthOptions);
+    const userId = (session?.user as { id?: string } | undefined)?.id;
 
-    if (!session?.user?.id) {
+    if (!userId) {
       return error('ログインしてください', 401);
     }
 
-    if (session.user.id !== params.id) {
+    if (userId !== id) {
       return error('この操作は許可されていません', 403);
     }
 
@@ -96,14 +101,14 @@ export async function PUT(
     // User と UserProfile を同時に更新するため transaction を使用
     const result = await prisma.$transaction(async (tx) => {
       const updatedUser = await tx.user.update({
-        where: { id: params.id },
+        where: { id },
         data: { name: body.name },
         select: { id: true, name: true },
       });
 
       // プロフィール詳細は UserProfile 側で管理
       const updatedProfile = await tx.userProfile.upsert({
-        where: { userId: params.id },
+        where: { userId: id },
         update: {
           iconUrl: body.iconUrl ?? null,
           headline: body.headline ?? null,
@@ -116,7 +121,7 @@ export async function PUT(
           tags: body.tags ?? [],
         },
         create: {
-          userId: params.id,
+          userId: id,
           // TODO: displayName カラム削除までの暫定対応
           displayName: body.name ?? '',
           iconUrl: body.iconUrl ?? null,
