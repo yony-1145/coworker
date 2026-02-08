@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession, type AuthOptions } from 'next-auth';
-import type { Prisma } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
 import { authOptions } from '@/lib/authOptions';
 import { error, success } from '@/lib/apiResponse';
 import { userProfileSchema } from '@/lib/validation/userProfileValidators';
@@ -100,7 +100,12 @@ export async function PUT(
     const body = parsed.data;
 
     // User と UserProfile を同時に更新するため transaction を使用
-    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    type TransactionClient =
+      Parameters<PrismaClient['$transaction']>[0] extends (arg: infer A) => unknown
+        ? A
+        : never;
+
+    const result = await prisma.$transaction(async (tx: TransactionClient) => {
       const updatedUser = await tx.user.update({
         where: { id },
         data: { name: body.name },
