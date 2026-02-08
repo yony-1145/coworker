@@ -9,7 +9,6 @@ const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org/search';
  *
  * 仕様：
  * - 住所・地名を緯度経度に変換（Nominatim）
- * - User-Agent は環境変数 GEOCODE_USER_AGENT で指定する（必須）
  * - 同一クエリは5分間キャッシュ
  * - 画面表示用に検索結果を最大5件返却
  */

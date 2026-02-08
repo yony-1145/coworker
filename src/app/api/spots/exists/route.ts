@@ -5,8 +5,7 @@ import { error, success } from '@/lib/apiResponse';
  * スポット重複チェック API
  *
  * 仕様：
- * - クエリ: lat, lon（titleは無視）
- * - 緯度経度をE5に丸め、完全一致のスポットがあれば exists: true
+ * - 緯度経度をE5で比較、完全一致のスポットがあれば重複判定
  */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
