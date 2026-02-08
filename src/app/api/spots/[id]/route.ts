@@ -67,8 +67,10 @@ export async function GET(
       spot.ratings.length > 0
         ? Number(
             (
-              spot.ratings.reduce((sum, r) => sum + r.score, 0) /
-              spot.ratings.length
+              spot.ratings.reduce(
+                (sum: number, r: { score: number }) => sum + r.score,
+                0,
+              ) / spot.ratings.length
             ).toFixed(1),
           )
         : null;
