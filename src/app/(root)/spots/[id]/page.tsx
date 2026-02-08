@@ -1,7 +1,7 @@
 import SpotDetail from '@/components/SpotDetail';
 
 type SpotPageProps = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 /**

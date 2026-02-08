@@ -1,4 +1,4 @@
-import { getServerSession } from 'next-auth';
+import { getServerSession, type AuthOptions } from 'next-auth';
 import { supabaseServer } from '@/lib/supabase/server';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { error, success } from '@/lib/apiResponse';
@@ -18,8 +18,9 @@ function getExtension(filename: string) {
  */
 export async function POST(req: Request) {
   // ログインユーザのみ許可
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+  const session = await getServerSession(authOptions as AuthOptions);
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  if (!userId) {
     return error('ログインしてください', 401);
   }
 
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
   const bucket = type === 'user' ? 'user-icons' : 'spot-images';
   const dir = type === 'user' ? 'users' : 'spots';
   const ext = getExtension(file.name);
-  const filePath = `${dir}/${session.user.id}_${Date.now()}.${ext}`;
+  const filePath = `${dir}/${userId}_${Date.now()}.${ext}`;
 
   // Supabase Storage へアップロード
   const { error: uploadError } = await supabaseServer.storage

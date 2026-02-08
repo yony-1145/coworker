@@ -45,7 +45,7 @@ function safeHostname(url: string): string {
 export default async function UserProfilePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
   const session = await getServerSession(authOptions as AuthOptions);

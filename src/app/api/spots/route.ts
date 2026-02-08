@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { getServerSession } from 'next-auth/next';
+import type { AuthOptions } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { error, success } from '@/lib/apiResponse';
 
@@ -56,8 +57,8 @@ export async function GET(req: Request) {
       where: q
         ? {
             OR: [
-              { title: { contains: q, mode: 'insensitive' } },
-              { description: { contains: q, mode: 'insensitive' } },
+              { title: { contains: q } },
+              { description: { contains: q } },
             ],
           }
         : undefined,
@@ -84,8 +85,9 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     // 認証チェック
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const session = await getServerSession(authOptions as AuthOptions);
+    const sessionUserId = (session?.user as { id?: string } | undefined)?.id;
+    if (!sessionUserId) {
       return error('ログインしてください', 401);
     }
 
@@ -105,7 +107,7 @@ export async function POST(req: Request) {
 
     const v = parsed.data;
     const tags = normalizeTags(v.tags);
-    const userId = session.user.id;
+    const userId = sessionUserId;
 
     // 緯度経度をE5形式に変換、浮動小数による誤差を防ぐために四捨五入
     const latE5 = Math.round(v.latitude * 1e5);
