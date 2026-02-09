@@ -12,7 +12,10 @@ import { error, success } from '@/lib/apiResponse';
 export async function POST(req: Request) {
   try {
     // リクエストボディ取得
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body) {
+      return error('入力内容が不正です', 400);
+    }
 
     // 入力値の正規化・最低限のバリデーション
     const name = typeof body?.name === 'string' ? body.name.trim() : '';

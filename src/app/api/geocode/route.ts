@@ -14,7 +14,11 @@ const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org/search';
  */
 export async function POST(req: Request) {
   try {
-    const { address } = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== 'object') {
+      return error('住所が未入力です。', 400);
+    }
+    const { address } = body as { address?: unknown };
 
     if (!address || typeof address !== 'string' || !address.trim()) {
       return error('住所が未入力です。', 400);

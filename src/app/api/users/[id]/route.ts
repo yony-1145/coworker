@@ -9,7 +9,7 @@ import { userProfileSchema } from '@/lib/validation/userProfileValidators';
  * ユーザープロフィール取得 API
  *
  * 仕様：
- * - 未ログインアクセスを拒否
+ * - ログインユーザのみ取得可能（本人・他人どちらも可）
  * - User + UserProfile をまとめて返却
  */
 export async function GET(
@@ -89,7 +89,10 @@ export async function PUT(
       return error('この操作は許可されていません', 403);
     }
 
-    const raw = await req.json();
+    const raw = await req.json().catch(() => null);
+    if (!raw) {
+      return error('入力内容に誤りがあります', 400);
+    }
     const parsed = userProfileSchema.safeParse(raw);
     if (!parsed.success) {
       const msg = parsed.error.flatten().fieldErrors;
@@ -147,6 +150,14 @@ export async function PUT(
 
     return success(result);
   } catch (err) {
+    if (
+      err &&
+      typeof err === 'object' &&
+      'code' in err &&
+      (err as { code: string }).code === 'P2025'
+    ) {
+      return error('ユーザーが見つかりません', 404);
+    }
     console.error('Failed to update user', err);
     return error('サーバーエラーが発生しました', 500);
   }

@@ -14,7 +14,7 @@ export default async function UserProfileEditPage({
   const session = await getServerSession(authOptions as AuthOptions);
   const userId = (session?.user as { id?: string } | undefined)?.id;
 
-  if (!userId) redirect('/signin');
+  if (!userId) redirect('/login');
   if (userId !== id) notFound();
 
   return <UserProfileEdit id={id} />;
