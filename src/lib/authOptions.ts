@@ -1,10 +1,8 @@
 import CredentialsProvider from 'next-auth/providers/credentials';
 import type { AuthOptions, Session, User } from 'next-auth';
 import type { JWT } from 'next-auth/jwt';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { compare } from 'bcryptjs';
-
-const prisma = new PrismaClient();
 
 type AppToken = JWT & { id?: string; email?: string };
 type SessionUser = Session['user'] & { id?: string; email?: string };
