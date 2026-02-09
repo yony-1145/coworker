@@ -6,6 +6,9 @@ import { NextAuthProvider } from '@/lib/NextAuthProvider';
 export const metadata: Metadata = {
   title: 'Coworker',
   description: 'MVP版',
+  icons: {
+    icon: '/window.svg',
+  },
 };
 
 export default function RootLayout({

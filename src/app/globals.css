@@ -17,6 +17,19 @@
     --background: #0a0a0a;
     --foreground: #ededed;
   }
+
+  .text-gray-400 {
+    color: #d1d5db;
+  }
+  .text-gray-500 {
+    color: #e5e7eb;
+  }
+  .text-gray-600 {
+    color: #f3f4f6;
+  }
+  .text-gray-700 {
+    color: #f9fafb;
+  }
 }
 
 body {
