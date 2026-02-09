@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { getServerSession } from 'next-auth/next';
 import type { AuthOptions } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
-import { cookies, headers } from 'next/headers';
+import { cookies } from 'next/headers';
 
 // TODO: 型定義を共通化・修正予定
 type UserProfile = {
@@ -38,21 +38,6 @@ function safeHostname(url: string): string {
   }
 }
 
-async function resolveBaseUrl() {
-  const envUrl =
-    process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL;
-  if (envUrl) return envUrl;
-
-  const vercelUrl = process.env.VERCEL_URL;
-  if (vercelUrl) return `https://${vercelUrl}`;
-
-  const headerList = await headers();
-  const host =
-    headerList.get('x-forwarded-host') ?? headerList.get('host');
-  const proto = headerList.get('x-forwarded-proto') ?? 'https';
-  return host ? `${proto}://${host}` : 'http://localhost:3000';
-}
-
 /**
  * ユーザープロフィール表示ページ
  * - 本人の場合のみ編集リンクを表示
@@ -66,7 +51,7 @@ export default async function UserProfilePage({
   const session = await getServerSession(authOptions as AuthOptions);
   const sessionUserId = (session?.user as { id?: string } | undefined)?.id;
   const isOwner = sessionUserId === id;
-  const baseUrl = await resolveBaseUrl();
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
   const cookie = await cookies();
   const cookieHeader = cookie.toString();
