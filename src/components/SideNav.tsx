@@ -67,7 +67,14 @@ export default function SideNav() {
         }`}
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Coworker</h2>
+          <div className="flex items-center gap-3">
+            <img
+              src="/coworker.jpg"
+              alt="Coworker"
+              className="h-6 w-6 rounded-md object-cover"
+            />
+            <h2 className="text-lg font-semibold text-gray-900">Coworker</h2>
+          </div>
           <button
             type="button"
             onClick={() => setIsOpen(false)}

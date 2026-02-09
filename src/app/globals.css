@@ -30,6 +30,12 @@
   .text-gray-700 {
     color: #f9fafb;
   }
+  .text-gray-800 {
+    color: #f9fafb;
+  }
+  .text-gray-900 {
+    color: #ffffff;
+  }
 }
 
 body {

@@ -1,4 +1,4 @@
-# 🧭 Coworker
+# 🧭 Coworker <img src="public/coworker.jpg" alt="Coworker" width="24" height="24" />
 
 コワーキング/カフェのスポット投稿・検索ができるアプリ。  
 マップで近くのスポットを見つけ、設備情報や写真を共有できます。

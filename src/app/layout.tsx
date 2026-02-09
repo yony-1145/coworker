@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: 'Coworker',
   description: 'MVP版',
   icons: {
-    icon: '/window.svg',
+    icon: '/coworker.jpg',
   },
 };
 

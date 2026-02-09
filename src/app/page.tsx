@@ -35,7 +35,14 @@ export default function WelcomePage() {
         <section className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg border border-gray-100 p-8 md:p-12">
           <div className="grid gap-10 md:grid-cols-2 md:items-center">
             <div className="space-y-6">
-              <p className="text-3xl font-semibold black">Coworker</p>
+              <div className="flex items-center gap-3">
+                <img
+                  src="/coworker.jpg"
+                  alt="Coworker"
+                  className="h-8 w-8 rounded-md object-cover"
+                />
+                <p className="text-3xl font-semibold text-gray-900">Coworker</p>
+              </div>
               <h1 className="text-3xl md:text-4xl font-semibold text-gray-900 leading-tight">
                 作業に最適な場所を、
                 <br />
