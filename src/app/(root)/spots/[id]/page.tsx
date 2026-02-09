@@ -13,6 +13,9 @@ export default async function SpotPage({ params }: SpotPageProps) {
   const { id } = await params;
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL ?? process.env.NEXTAUTH_URL!;
+  if (!baseUrl) {
+    throw new Error('NEXT_PUBLIC_BASE_URL is required');
+  }
 
   const res = await fetch(`${baseUrl}/api/spots/${id}`, {
     cache: 'no-store',

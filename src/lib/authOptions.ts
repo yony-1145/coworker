@@ -4,6 +4,10 @@ import type { JWT } from 'next-auth/jwt';
 import { prisma } from '@/lib/prisma';
 import { compare } from 'bcryptjs';
 
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error('NEXTAUTH_SECRET is required');
+}
+
 type AppToken = JWT & { id?: string; email?: string };
 type SessionUser = Session['user'] & { id?: string; email?: string };
 

@@ -53,6 +53,9 @@ export default async function UserProfilePage({
   const isOwner = sessionUserId === id;
   const baseUrl =
     process.env.NEXT_PUBLIC_BASE_URL ?? process.env.NEXTAUTH_URL!;
+  if (!baseUrl) {
+    throw new Error('NEXT_PUBLIC_BASE_URL is required');
+  }
 
   const cookie = await cookies();
   const cookieHeader = cookie.toString();
