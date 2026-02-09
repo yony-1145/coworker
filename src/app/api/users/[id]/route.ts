@@ -9,7 +9,7 @@ import { userProfileSchema } from '@/lib/validation/userProfileValidators';
  * ユーザープロフィール取得 API
  *
  * 仕様：
- * - ログインユーザのみ取得可能（本人・他人どちらも可）
+ * - ログインユーザのみ取得可能（本人・他人）
  * - User + UserProfile をまとめて返却
  */
 export async function GET(
@@ -102,10 +102,11 @@ export async function PUT(
     const body = parsed.data;
 
     // User と UserProfile を同時に更新するため transaction を使用
-    type TransactionClient =
-      Parameters<typeof prisma.$transaction>[0] extends (arg: infer A) => unknown
-        ? A
-        : never;
+    type TransactionClient = Parameters<typeof prisma.$transaction>[0] extends (
+      arg: infer A,
+    ) => unknown
+      ? A
+      : never;
 
     const result = await prisma.$transaction(async (tx: TransactionClient) => {
       const updatedUser = await tx.user.update({

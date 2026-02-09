@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧭 Coworker
 
-## Getting Started
+コワーキング/カフェのスポット投稿・検索ができるアプリ。  
+マップで近くのスポットを見つけ、設備情報や写真を共有できます。
 
-First, run the development server:
+This is a Next.js-based web application for sharing and discovering coworking/cafe spots on a map.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Live App**: [https://coworker-pi.vercel.app](https://coworker-pi.vercel.app)
+- **GitHub Repo**: [https://github.com/yony-1145/coworker](https://github.com/yony-1145/coworker)
+
+---
+
+## 🛠 技術スタック
+
+- **Next.js**
+- **React**
+- **TypeScript**
+- **Tailwind CSS**
+- **Prisma**
+- **PostgreSQL (Supabase)**
+- **Supabase Storage**
+- **NextAuth**
+- **MapLibre**
+- **Vercel**
+
+---
+
+## 🏗️ アーキテクチャ
+
+**画像準備中**
+
+---
+
+## ✨ 主な機能
+
+- ログイン（NextAuth）
+- スポット投稿（画像/タグ/設備情報）
+- マップで一覧・検索
+- 位置情報のジオコーディング（Nominatim）
+- ユーザープロフィール
+
+---
+
+## 📦 ディレクトリ構成（抜粋）
+
+```
+coworker/
+├── src/
+│   ├── app/              # Next.js のルーティング構成
+│   ├── components/       # UI コンポーネント
+│   ├── hooks/            # カスタムフック
+│   ├── lib/              # 各種ロジック（認証、DB、API など）
+├── prisma/               # Prisma スキーマとマイグレーション
+├── public/
+├── .env.example          # 環境変数の例
+├── next.config.js
+├── tailwind.config.ts
+├── README.md
 ```
 
-Open the app in your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## ⚙️ 環境構築手順
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **リポジトリをクローン**
 
-## Learn More
+```bash
+git clone https://github.com/yony-1145/coworker.git
+cd coworker
+```
 
-To learn more about Next.js, take a look at the following resources:
+2. **依存パッケージのインストール**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm install
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **環境変数ファイルの作成**
 
-## Deploy on Vercel
+`.env.local` をプロジェクトルートに作成し、以下を設定してください。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```env
+DATABASE_URL=
+NEXTAUTH_URL=
+NEXTAUTH_SECRET=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+GEOCODE_USER_AGENT=
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. **開発サーバーを起動**
+
+```bash
+pnpm dev
+```
+
+---
+
+## 🛠 今後の開発予定
+
+- [ ] 検索・フィルタ機能の強化
+- [ ] 画像最適化と表示パフォーマンス改善
+
+---
+
+コワーキング環境選びの体験を良くするためのプロダクトです。ぜひご活用ください！
