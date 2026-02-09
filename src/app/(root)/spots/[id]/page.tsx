@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import SpotDetail from '@/components/SpotDetail';
 
 type SpotPageProps = {
@@ -12,7 +13,16 @@ type SpotPageProps = {
 export default async function SpotPage({ params }: SpotPageProps) {
   const { id } = await params;
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const envUrl =
+    process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL;
+  const vercelUrl = process.env.VERCEL_URL;
+  const headerList = await headers();
+  const host = headerList.get('x-forwarded-host') ?? headerList.get('host');
+  const proto = headerList.get('x-forwarded-proto') ?? 'https';
+  const baseUrl =
+    envUrl ||
+    (vercelUrl ? `https://${vercelUrl}` : '') ||
+    (host ? `${proto}://${host}` : 'http://localhost:3000');
 
   const res = await fetch(`${baseUrl}/api/spots/${id}`, {
     cache: 'no-store',
