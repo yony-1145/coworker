@@ -11,8 +11,10 @@ type SpotPageProps = {
  */
 export default async function SpotPage({ params }: SpotPageProps) {
   const { id } = await params;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ?? process.env.NEXTAUTH_URL!;
 
-  const res = await fetch(`/api/spots/${id}`, {
+  const res = await fetch(`${baseUrl}/api/spots/${id}`, {
     cache: 'no-store',
   });
 

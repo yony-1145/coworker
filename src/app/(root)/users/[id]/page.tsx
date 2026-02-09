@@ -51,11 +51,13 @@ export default async function UserProfilePage({
   const session = await getServerSession(authOptions as AuthOptions);
   const sessionUserId = (session?.user as { id?: string } | undefined)?.id;
   const isOwner = sessionUserId === id;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ?? process.env.NEXTAUTH_URL!;
 
   const cookie = await cookies();
   const cookieHeader = cookie.toString();
 
-  const res = await fetch(`/api/users/${id}`, {
+  const res = await fetch(`${baseUrl}/api/users/${id}`, {
     cache: 'no-store',
     headers: {
       cookie: cookieHeader,
