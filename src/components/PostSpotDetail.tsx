@@ -221,7 +221,7 @@ export default function SpotDetailsPage() {
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="スターバックス 博多駅店"
+            placeholder="店舗名"
             className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-1.5 text-gray-800 focus:ring-2 focus:ring-indigo-400 transition"
             required
           />
@@ -273,7 +273,7 @@ export default function SpotDetailsPage() {
           <input
             value={openingHours}
             onChange={(e) => setOpeningHours(e.target.value)}
-            placeholder="9:00-18:00 / 平日 10:00-19:00"
+            placeholder="営業時間"
             maxLength={100}
             className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-1.5 text-gray-800 focus:ring-2 focus:ring-indigo-400 transition"
           />

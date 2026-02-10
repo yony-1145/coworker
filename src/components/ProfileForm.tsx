@@ -94,7 +94,7 @@ export const ProfileForm = ({
                 ? 'border-red-400 bg-red-50'
                 : 'border-gray-300 bg-gray-50'
             }`}
-            placeholder="名前を入力"
+            placeholder="名前"
           />
           {errors.name && (
             <p className="text-xs text-red-600 mt-1">{errors.name}</p>
@@ -117,7 +117,7 @@ export const ProfileForm = ({
               ? 'border-red-400 bg-red-50'
               : 'border-gray-300 bg-gray-50'
           }`}
-          placeholder="地方でエンジニアをしています"
+          placeholder="ひとこと"
         />
         {errors.headline && (
           <p className="text-xs text-red-600 mt-1">{errors.headline}</p>
@@ -145,7 +145,7 @@ export const ProfileForm = ({
                   ? 'border-red-400 bg-red-50'
                   : 'border-gray-300 bg-gray-50'
               }`}
-              placeholder="Webエンジニア"
+              placeholder="職種"
             />
             {errors.occupation && (
               <p className="text-xs text-red-600 mt-1">{errors.occupation}</p>
@@ -166,7 +166,7 @@ export const ProfileForm = ({
                   ? 'border-red-400 bg-red-50'
                   : 'border-gray-300 bg-gray-50'
               }`}
-              placeholder="株式会社エンジニア"
+              placeholder="所属"
             />
             {errors.affiliation && (
               <p className="text-xs text-red-600 mt-1">{errors.affiliation}</p>

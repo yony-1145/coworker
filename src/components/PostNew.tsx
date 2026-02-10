@@ -161,7 +161,7 @@ export default function PostNew() {
                 setSearchReturnedEmpty(false);
                 setFormError(null);
               }}
-              placeholder="博多駅 スターバックス"
+              placeholder="場所や店名"
               className="flex-1 border rounded-lg px-3 py-2"
               disabled={isSearching}
             />

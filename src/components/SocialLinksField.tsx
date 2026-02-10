@@ -49,7 +49,7 @@ export const SocialLinksField = ({
                 type="url"
                 value={url}
                 onChange={(e) => handleChange(i, e.target.value)}
-                placeholder="https://example.com"
+                placeholder="https://example"
                 className="flex-1 bg-transparent focus:outline-none text-sm text-gray-800"
               />
               <button
