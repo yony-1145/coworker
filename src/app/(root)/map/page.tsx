@@ -112,7 +112,7 @@ export default function MapPage() {
 
   return (
     <>
-      <div className="relative h-screen w-full">
+      <div className="relative h-screen w-[calc(100%+3rem)] -m-6">
         <div className="absolute left-4 top-4 z-20 md:hidden">
           <button
             type="button"
