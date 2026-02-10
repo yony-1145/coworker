@@ -67,8 +67,12 @@ export default function WelcomePage() {
                 </Link>
               </div>
             </div>
-            <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 h-64 md:h-72 flex items-center justify-center text-gray-400 text-sm">
-              ここにアプリ画面の画像
+            <div className="rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm aspect-video max-h-72">
+              <img
+                src="/welcome/map.png"
+                alt="地図でスポットを探す画面"
+                className="w-full h-full object-cover object-top"
+              />
             </div>
           </div>
         </section>
@@ -132,8 +136,27 @@ export default function WelcomePage() {
                 ))}
               </div>
             </div>
-            <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 h-64 md:h-72 flex items-center justify-center text-gray-400 text-sm">
-              ここに機能説明の画像
+            <div className="grid grid-cols-2 gap-2 rounded-2xl overflow-hidden border border-gray-200 bg-gray-50 shadow-sm h-64 md:h-72">
+              <img
+                src="/welcome/nav.png"
+                alt="ナビゲーション"
+                className="w-full h-full object-cover object-top"
+              />
+              <img
+                src="/welcome/map.png"
+                alt="地図でスポットを探す"
+                className="w-full h-full object-cover object-top"
+              />
+              <img
+                src="/welcome/location.png"
+                alt="場所を決定して投稿"
+                className="w-full h-full object-cover object-top"
+              />
+              <img
+                src="/welcome/profile.png"
+                alt="プロフィール"
+                className="w-full h-full object-cover object-top"
+              />
             </div>
           </div>
         </section>
