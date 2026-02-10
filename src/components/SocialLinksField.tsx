@@ -32,7 +32,7 @@ export const SocialLinksField = ({
   };
 
   return (
-    <div className="border-t pt-4">
+    <div className="border-t pt-3">
       <h2 className="text-lg font-semibold mb-2 text-gray-900">SNSリンク</h2>
       <div className="flex flex-col gap-2">
         {links.map((url, i) => (

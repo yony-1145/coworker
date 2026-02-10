@@ -55,7 +55,7 @@ export const ProfileForm = ({
         e.preventDefault();
         handleSubmit();
       }}
-      className="space-y-8 overflow-y-auto max-h-[calc(100vh-180px)] pr-1"
+      className="space-y-5 overflow-y-auto max-h-[calc(100vh-180px)] pr-1"
     >
       {/* ヘッダー（画像＋表示名） */}
       <div className="flex items-center gap-6">
@@ -125,12 +125,12 @@ export const ProfileForm = ({
       </div>
 
       {/* 職業・所属・自己紹介 */}
-      <div className="border-t pt-4">
-        <h2 className="text-xl font-semibold mb-3 text-gray-900">
+      <div className="border-t pt-3">
+        <h2 className="text-lg font-semibold mb-2 text-gray-900">
           職業・所属・自己紹介
         </h2>
 
-        <div className="flex flex-wrap gap-4 mb-4">
+        <div className="flex flex-wrap gap-3 mb-3">
           <div className="flex-1 min-w-[45%]">
             <label className="block text-sm font-medium text-gray-600 mb-1">
               職業
@@ -204,14 +204,17 @@ export const ProfileForm = ({
       />
 
       {/* タグ */}
-      <TagsField
-        tags={profile.tags ?? []}
-        errors={errors.tags as string}
-        onChange={handleTagChange}
-      />
+      <div className="border-t pt-3">
+        <h2 className="text-lg font-semibold mb-2 text-gray-900">タグ</h2>
+        <TagsField
+          tags={profile.tags ?? []}
+          errors={errors.tags as string}
+          onChange={handleTagChange}
+        />
+      </div>
 
       {/* 保存ボタン */}
-      <div className="pt-4 border-t">
+      <div className="pt-3 border-t">
         <button
           type="submit"
           disabled={hasErrors}
