@@ -73,11 +73,9 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
     longitude,
     user,
     createdAt,
-    comments,
   } = spot;
 
   const urls = Array.isArray(imageUrls) ? imageUrls : [];
-  const commentList = Array.isArray(comments) ? comments : [];
   const hasDescription = Boolean(description && description.trim() !== '');
   const equipment = [
     hasWifi && 'Wi-Fiあり',
@@ -208,21 +206,7 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
 
         <section className="border-t pt-4 space-y-3">
           <h2 className="text-xl font-semibold text-gray-900">コメント</h2>
-          {commentList.length > 0 ? (
-            <div className="space-y-3">
-              {commentList.map((comment) => (
-                <div key={comment.id} className="rounded-xl border p-4">
-                  <p className="text-sm text-gray-700">{comment.content}</p>
-                  <p className="mt-1 text-xs text-gray-500">
-                    {comment.user?.name ?? 'ユーザー'}・
-                    {new Date(comment.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-gray-500">コメントはまだありません。</p>
-          )}
+          <p className="text-sm text-gray-500">機能追加予定</p>
         </section>
       </div>
     </main>
