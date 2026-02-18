@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import type { AuthOptions } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { error, success } from '@/lib/apiResponse';
+import { getDefaultSpotIconByGenre } from '@/lib/spotIcons';
 
 /**
  * スポット投稿（POST）用の入力スキーマ
@@ -137,7 +138,10 @@ export async function POST(req: Request) {
         hasPhoneCallOK: v.hasPhoneCallOK ?? false,
         hasMeetingSpace: v.hasMeetingSpace ?? false,
         crowdLevel: v.crowdLevel ?? 'MID',
-        imageUrls: v.imageUrls ?? [], // 既存互換のため残す
+        imageUrls:
+          v.imageUrls && v.imageUrls.length > 0
+            ? v.imageUrls
+            : [getDefaultSpotIconByGenre(v.genre)],
         ...(tags.length > 0
           ? {
               tags: {
@@ -152,16 +156,18 @@ export async function POST(req: Request) {
       include: { tags: { select: { name: true } } },
     });
 
-    // 画像をSpotImageテーブルに保存（複数対応）
-    if (v.imageUrls && v.imageUrls.length > 0) {
-      await prisma.spotImage.createMany({
-        data: v.imageUrls.map((url, index) => ({
-          spotId: newSpot.id,
-          url: url,
-          sortOrder: index,
-        })),
-      });
-    }
+    // 画像をSpotImageテーブルに保存（複数対応・未選択時はジャンル別デフォルト1件）
+    const imageUrlsToSave =
+      v.imageUrls && v.imageUrls.length > 0
+        ? v.imageUrls
+        : [getDefaultSpotIconByGenre(v.genre)];
+    await prisma.spotImage.createMany({
+      data: imageUrlsToSave.map((url, index) => ({
+        spotId: newSpot.id,
+        url: url,
+        sortOrder: index,
+      })),
+    });
 
     // 作成したSpotを再取得（imagesを含む）
     const spotWithImages = await prisma.spot.findUnique({
