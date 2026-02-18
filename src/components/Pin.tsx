@@ -53,6 +53,7 @@ export default function Pin({
             (item as SpotPin).genre ?? undefined,
           ));
 
+  const isSpot = type === 'spot';
   return (
     <Marker
       longitude={lng}
@@ -63,15 +64,27 @@ export default function Pin({
         onClick?.();
       }}
     >
-      <div className="flex flex-col items-center transform -translate-y-1.5">
-        <Image
-          src={image}
-          alt={name ?? type}
-          width={40}
-          height={40}
-          unoptimized
-          className="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover cursor-pointer"
-        />
+      <div className="flex flex-col items-center">
+        <div
+          className={
+            isSpot
+              ? 'w-10 h-14 flex items-end justify-center overflow-visible'
+              : 'transform -translate-y-1.5'
+          }
+        >
+          <Image
+            src={image}
+            alt={name ?? type}
+            width={isSpot ? 40 : 40}
+            height={isSpot ? 56 : 40}
+            unoptimized
+            className={
+              isSpot
+                ? 'w-10 h-14 object-contain object-bottom cursor-pointer drop-shadow-md'
+                : 'w-10 h-10 rounded-full border-2 border-white shadow-md object-cover cursor-pointer'
+            }
+          />
+        </div>
         {showName && (
           <span className="mt-1 bg-white text-gray-800 text-xs font-medium px-2 py-0.5 rounded-md shadow-sm whitespace-nowrap">
             {name ?? type}
