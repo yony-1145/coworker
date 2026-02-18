@@ -1,6 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { Marker } from 'react-map-gl/maplibre';
+import { getDefaultSpotIconByGenre } from '@/lib/spotIcons';
 
 type BasePinProps = {
   lat: number;
@@ -16,6 +17,7 @@ type UserPin = {
 
 type SpotPin = {
   title?: string | null;
+  genre?: 'CAFE' | 'COWORKING' | 'OTHER' | null;
   imageUrls?: string[] | null;
 };
 
@@ -46,7 +48,10 @@ export default function Pin({
   const image =
     type === 'user'
       ? (item?.image ?? '/user-icons/default.png')
-      : (item?.imageUrls?.[0] ?? '/spot-icons/default.png');
+      : (item?.imageUrls?.[0] ??
+          getDefaultSpotIconByGenre(
+            (item as SpotPin).genre ?? undefined,
+          ));
 
   return (
     <Marker

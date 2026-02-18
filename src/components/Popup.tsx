@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Popup as MapPopup } from 'react-map-gl/maplibre';
+import { getDefaultSpotIconByGenre } from '@/lib/spotIcons';
 
 type PopupProps = {
   type: 'user' | 'spot';
@@ -21,6 +22,7 @@ type UserPopup = {
 type SpotPopup = {
   id?: string;
   title?: string | null;
+  genre?: 'CAFE' | 'COWORKING' | 'OTHER' | null;
   imageUrls?: string[] | null;
   latitude?: number | null;
   longitude?: number | null;
@@ -68,7 +70,8 @@ export default function Popup({
 
   const image = isUser
     ? (userItem?.image ?? '/user-icons/default.png')
-    : (spotItem?.imageUrls?.[0] ?? '/spot-icons/default.png');
+    : (spotItem?.imageUrls?.[0] ??
+        getDefaultSpotIconByGenre(spotItem?.genre ?? undefined));
 
   const trimmedMessage = message?.trim() ?? '';
   const shownMessage = trimmedMessage ? truncateMessage(trimmedMessage) : '';

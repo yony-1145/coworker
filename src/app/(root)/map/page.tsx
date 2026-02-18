@@ -13,6 +13,7 @@ type MapSpot = {
   description?: string | null;
   latitude: number;
   longitude: number;
+  genre?: 'CAFE' | 'COWORKING' | 'OTHER' | null;
   imageUrls?: string[] | null;
   hasWifi?: boolean;
   hasPower?: boolean;

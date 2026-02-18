@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { Map, Marker } from 'react-map-gl/maplibre';
 import Link from 'next/link';
+import { getDefaultSpotIconByGenre } from '@/lib/spotIcons';
 
 const GENRE_LABEL: Record<string, string> = {
   CAFE: 'カフェ',
@@ -76,6 +77,8 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
   } = spot;
 
   const urls = Array.isArray(imageUrls) ? imageUrls : [];
+  const displayUrls =
+    urls.length > 0 ? urls : [getDefaultSpotIconByGenre(genre as 'CAFE' | 'COWORKING' | 'OTHER' | undefined)];
   const hasDescription = Boolean(description && description.trim() !== '');
   const equipment = [
     hasWifi && 'Wi-Fiあり',
@@ -106,9 +109,8 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
         </header>
 
         <section className="border-t pt-4">
-        {urls.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {urls.map((url, i) => (
+            {displayUrls.map((url, i) => (
               <Image
                 key={i}
                 src={url}
@@ -120,11 +122,6 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
               />
             ))}
           </div>
-        ) : (
-          <div className="w-full min-h-[140px] bg-gray-100 flex items-center justify-center text-gray-400 rounded-xl">
-            画像はありません
-          </div>
-        )}
         </section>
 
         {address && (
