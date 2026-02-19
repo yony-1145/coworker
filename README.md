@@ -7,6 +7,7 @@ This is a Next.js-based web application for sharing and discovering coworking/ca
 
 - **Live App**: [https://coworker-pi.vercel.app](https://coworker-pi.vercel.app)
 - **GitHub Repo**: [https://github.com/yony-1145/coworker](https://github.com/yony-1145/coworker)
+- **技術選定の記事**: [地図アプリを個人開発する中で考えた技術選定の話（Next.js × Supabase × NextAuth） - Qiita](https://qiita.com/yony-1145/items/89709ea09f96dc6fa235)
 
 ---
 
