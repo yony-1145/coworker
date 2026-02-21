@@ -5,6 +5,7 @@ import type { AuthOptions } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { error, success } from '@/lib/apiResponse';
 import { getDefaultSpotIconByGenre } from '@/lib/spotIcons';
+import { normalizeTags } from '@/lib/spotUtils';
 
 /**
  * スポット投稿（POST）用の入力スキーマ
@@ -28,19 +29,6 @@ const SpotPostSchema = z.object({
   imageUrls: z.array(z.string().url()).optional().nullable(),
   tags: z.array(z.string()).optional().nullable(),
 }); // Todo:修正予定、別ファイルに移動
-
-/**
- * タグ配列をDB保存用に正規化する
- * - trim
- * - 空文字除去
- * - 重複除去
- * - 最大10件
- */
-function normalizeTags(tags?: string[] | null) {
-  if (!Array.isArray(tags)) return [];
-  const uniq = new Set(tags.map((t) => t.trim()).filter((t) => t.length > 0));
-  return Array.from(uniq).slice(0, 10);
-}
 
 /**
  * スポット一覧取得 API
