@@ -11,4 +11,6 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  // 単体テストでは CSS/PostCSS を扱わないため、PostCSS 読み込みをスキップ
+  css: { postcss: { plugins: [] } },
 });

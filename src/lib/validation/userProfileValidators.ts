@@ -1,13 +1,9 @@
 import { z } from 'zod';
 
 /**
- * プロフィールのバリデーション・型定義
- * 仕様
- * - フロントエンドの型定義をzodで定義・検証
- * - APIリクエストはフロントエンドの型定義を拡張したものを使用
+ * プロフィールのバリデーション・型定義。
+ * フロント・API 共通の Zod スキーマ。API 用は extend で userId を追加。
  */
-
-// フロント・API共通の型定義・バリデーション
 export const userProfileSchema = z.object({
   name: z
     .string()
@@ -63,13 +59,53 @@ export const userProfileSchema = z.object({
     .optional()
     .nullable(),
 });
-// スキーマから型を生成
+
 export type UserProfile = z.infer<typeof userProfileSchema>;
 
-// userIdを追加したAPIリクエストの型定義・バリデーション
+/** userId を追加した API リクエスト用スキーマ */
 export const userProfileSchemaAPI = userProfileSchema.extend({
   userId: z.string(),
 });
 
-// スキーマから型を生成
 export type UserProfileAPI = z.infer<typeof userProfileSchemaAPI>;
+
+/** プロフィールフォーム用の payload 型 */
+export type UserProfileFormPayload = {
+  iconUrl?: string | null;
+  headline?: string | null;
+  occupation?: string | null;
+  affiliation?: string | null;
+  bioText?: string | null;
+  links?: string[];
+  tags?: string[];
+};
+
+/**
+ * プロフィールフォーム用のバリデーション。
+ * userProfileSchema で検証し、フォーム表示用のエラーオブジェクトを返す。
+ * links は配列のまま、それ以外は先頭メッセージのみ。
+ */
+export function getProfileFormValidationErrors(
+  profile: UserProfileFormPayload,
+  userName: string,
+): Record<string, string | string[]> {
+  const payload = {
+    name: userName ?? '',
+    iconUrl: profile?.iconUrl ?? null,
+    headline: profile?.headline ?? null,
+    occupation: profile?.occupation ?? null,
+    affiliation: profile?.affiliation ?? null,
+    bioText: profile?.bioText ?? null,
+    links: profile?.links ?? [],
+    tags: profile?.tags ?? [],
+  };
+  const result = userProfileSchema.safeParse(payload);
+  if (result.success) return {};
+  const fieldErrors = result.error.flatten().fieldErrors;
+  const newErrors: Record<string, string | string[]> = {};
+  for (const [k, v] of Object.entries(fieldErrors)) {
+    if (!v?.length) continue;
+    newErrors[k] = k === 'links' ? v : v[0];
+  }
+  return newErrors;
+}

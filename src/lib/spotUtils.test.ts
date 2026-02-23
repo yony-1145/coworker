@@ -1,9 +1,34 @@
-/**
- * スポット用タグ正規化（normalizeTags）の単体テスト
- * 前後の空白削除・空文字除去・重複除去・最大10件の仕様を検証する
- */
+/** スポット用ユーティリティ（getDefaultSpotIconByGenre / normalizeTags / parseLatLngToE5）の単体テスト */
 import { describe, it, expect } from 'vitest';
-import { normalizeTags } from '@/lib/spotUtils';
+import {
+  getDefaultSpotIconByGenre,
+  normalizeTags,
+  parseLatLngToE5,
+} from '@/lib/spotUtils';
+
+describe('getDefaultSpotIconByGenre', () => {
+  it('returns cafe.svg for CAFE', () => {
+    expect(getDefaultSpotIconByGenre('CAFE')).toBe('/spot-icons/cafe.svg');
+  });
+
+  it('returns cowoking.svg for COWORKING', () => {
+    expect(getDefaultSpotIconByGenre('COWORKING')).toBe(
+      '/spot-icons/cowoking.svg',
+    );
+  });
+
+  it('returns pin.svg for OTHER', () => {
+    expect(getDefaultSpotIconByGenre('OTHER')).toBe('/spot-icons/pin.svg');
+  });
+
+  it('returns pin.svg for null', () => {
+    expect(getDefaultSpotIconByGenre(null)).toBe('/spot-icons/pin.svg');
+  });
+
+  it('returns pin.svg for undefined', () => {
+    expect(getDefaultSpotIconByGenre(undefined)).toBe('/spot-icons/pin.svg');
+  });
+});
 
 describe('normalizeTags', () => {
   // null を渡した場合、空配列を返すか（DB保存時の安全策）
@@ -52,5 +77,48 @@ describe('normalizeTags', () => {
     expect(
       normalizeTags(['静か', 'WiFi', '電源', 'WiFi', '静か']),
     ).toEqual(['静か', 'WiFi', '電源']);
+  });
+});
+
+describe('parseLatLngToE5', () => {
+  it('returns ok and E5 values for valid numbers', () => {
+    const result = parseLatLngToE5('35.6812', '139.7671');
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.latE5).toBe(3568120);
+      expect(result.lngE5).toBe(13976710);
+    }
+  });
+
+  it('rounds to nearest E5 integer', () => {
+    const result = parseLatLngToE5('35.68124', '139.76716');
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.latE5).toBe(3568124);
+      expect(result.lngE5).toBe(13976716);
+    }
+  });
+
+  it('returns ok: false for NaN lat', () => {
+    expect(parseLatLngToE5('invalid', '139.76').ok).toBe(false);
+  });
+
+  it('returns ok: false for NaN lng', () => {
+    expect(parseLatLngToE5('35.68', 'invalid').ok).toBe(false);
+  });
+
+  it('returns ok: false for null/empty', () => {
+    expect(parseLatLngToE5(null, '139.76').ok).toBe(false);
+    expect(parseLatLngToE5('35.68', null).ok).toBe(false);
+    expect(parseLatLngToE5('', '').ok).toBe(false);
+  });
+
+  it('handles negative coordinates', () => {
+    const result = parseLatLngToE5('-35.6812', '-139.7671');
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.latE5).toBe(-3568120);
+      expect(result.lngE5).toBe(-13976710);
+    }
   });
 });
