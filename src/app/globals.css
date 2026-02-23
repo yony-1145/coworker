@@ -1,8 +1,102 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+/* class ベースのダークモード */
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+}
+
+/* 手動でダークを選んだとき */
+html.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+/* システム設定に従うとき（class が付いていない場合のみ） */
+@media (prefers-color-scheme: dark) {
+  html:not(.light):not(.dark) {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+/* ダーク時の gray テキスト色（システム・手動どちらでも共通） */
+@media (prefers-color-scheme: dark) {
+  html:not(.light):not(.dark) .text-gray-400 {
+    color: #d1d5db;
+  }
+  html:not(.light):not(.dark) .text-gray-500 {
+    color: #e5e7eb;
+  }
+  html:not(.light):not(.dark) .text-gray-600 {
+    color: #f3f4f6;
+  }
+  html:not(.light):not(.dark) .text-gray-700 {
+    color: #f9fafb;
+  }
+  html:not(.light):not(.dark) .text-gray-800 {
+    color: #f9fafb;
+  }
+  html:not(.light):not(.dark) .text-gray-900 {
+    color: #ffffff;
+  }
+}
+
+html.dark .text-gray-400,
+.dark .text-gray-400 {
+  color: #d1d5db;
+}
+html.dark .text-gray-500,
+.dark .text-gray-500 {
+  color: #e5e7eb;
+}
+html.dark .text-gray-600,
+.dark .text-gray-600 {
+  color: #f3f4f6;
+}
+html.dark .text-gray-700,
+.dark .text-gray-700 {
+  color: #f9fafb;
+}
+html.dark .text-gray-800,
+.dark .text-gray-800 {
+  color: #f9fafb;
+}
+html.dark .text-gray-900,
+.dark .text-gray-900 {
+  color: #ffffff;
+}
+
+/* ダーク時の背景・ボーダー（よく使うユーティリティの一括対応） */
+html.dark .bg-white,
+.dark .bg-white {
+  background-color: rgb(31 41 55);
+}
+html.dark .bg-gray-50,
+.dark .bg-gray-50 {
+  background-color: rgb(17 24 39);
+}
+html.dark .bg-gray-100,
+.dark .bg-gray-100 {
+  background-color: rgb(31 41 55);
+}
+html.dark .border-gray-100,
+.dark .border-gray-100,
+html.dark .border-gray-200,
+.dark .border-gray-200,
+html.dark .border-gray-300,
+.dark .border-gray-300 {
+  border-color: rgb(55 65 81);
+}
+html.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-gray-50:hover {
+  background-color: rgb(31 41 55);
+}
+html.dark .hover\:bg-gray-100:hover,
+.dark .hover\:bg-gray-100:hover {
+  background-color: rgb(55 65 81);
 }
 
 @theme inline {
@@ -10,32 +104,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-
-  .text-gray-400 {
-    color: #d1d5db;
-  }
-  .text-gray-500 {
-    color: #e5e7eb;
-  }
-  .text-gray-600 {
-    color: #f3f4f6;
-  }
-  .text-gray-700 {
-    color: #f9fafb;
-  }
-  .text-gray-800 {
-    color: #f9fafb;
-  }
-  .text-gray-900 {
-    color: #ffffff;
-  }
 }
 
 body {

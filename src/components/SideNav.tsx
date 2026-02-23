@@ -49,7 +49,7 @@ export default function SideNav() {
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="fixed left-4 top-4 z-50 rounded-full bg-white p-2 shadow-md border border-gray-200 md:hidden"
+        className="fixed left-4 top-4 z-50 rounded-full bg-white dark:bg-gray-800 p-2 shadow-md border border-gray-200 dark:border-gray-700 md:hidden"
         aria-label="ナビゲーションを開く"
       >
         <Menu size={18} />
@@ -62,7 +62,7 @@ export default function SideNav() {
         aria-hidden
       />
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 border-r border-gray-200 bg-white p-4 transition-transform md:static md:z-auto md:w-56 md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 transition-transform md:static md:z-auto md:w-56 md:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
@@ -73,12 +73,12 @@ export default function SideNav() {
               alt="Coworker"
               className="h-6 w-6 rounded-md object-cover"
             />
-            <h2 className="text-lg font-semibold text-gray-900">Coworker</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Coworker</h2>
           </div>
           <button
             type="button"
             onClick={() => setIsOpen(false)}
-            className="rounded-md p-1 text-gray-500 hover:bg-gray-100 md:hidden"
+            className="rounded-md p-1 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 md:hidden"
             aria-label="ナビゲーションを閉じる"
           >
             <X size={18} />
@@ -88,7 +88,7 @@ export default function SideNav() {
         <nav className="mt-4 flex flex-col space-y-2">
           {navItems.map((item) => {
             const baseClass =
-              'flex items-center space-x-2 p-2 rounded-md w-full text-left hover:bg-gray-100';
+              'flex items-center space-x-2 p-2 rounded-md w-full text-left hover:bg-gray-100 dark:hover:bg-gray-800';
 
             // ログアウトは遷移ではなく action として処理
             if (item.type === 'action') {
@@ -113,7 +113,7 @@ export default function SideNav() {
                 key={item.href}
                 href={item.href}
                 className={`${baseClass} ${
-                  isActive ? 'bg-gray-200 font-medium' : ''
+                  isActive ? 'bg-gray-200 dark:bg-gray-700 font-medium' : ''
                 }`}
                 onClick={() => setIsOpen(false)}
               >
