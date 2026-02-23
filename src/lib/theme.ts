@@ -1,23 +1,18 @@
 export const THEME_STORAGE_KEY = 'coworker-theme';
 
-export type Theme = 'light' | 'dark' | 'system';
+export type Theme = 'light' | 'dark';
 
 export function getStoredTheme(): Theme {
-  if (typeof window === 'undefined') return 'system';
+  if (typeof window === 'undefined') return 'light';
   const stored = localStorage.getItem(THEME_STORAGE_KEY);
-  if (stored === 'light' || stored === 'dark' || stored === 'system') return stored;
-  return 'system';
+  if (stored === 'dark' || stored === 'light') return stored;
+  return 'light';
 }
 
 export function applyTheme(theme: Theme): void {
   const root = document.documentElement;
   root.classList.remove('light', 'dark');
-  if (theme === 'dark') {
-    root.classList.add('dark');
-  } else if (theme === 'light') {
-    root.classList.add('light');
-  }
-  // theme === 'system' のときは class を付けない（CSS の prefers-color-scheme に従う）
+  root.classList.add(theme);
 }
 
 export function setStoredTheme(theme: Theme): void {

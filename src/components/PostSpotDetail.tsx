@@ -189,16 +189,16 @@ export default function SpotDetailsPage() {
   };
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gray-50 px-4 py-6">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-sm p-6 md:p-8 space-y-8">
+    <main className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 px-4 py-6">
+      <div className="w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 md:p-8 space-y-8">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
             スポット情報を入力
           </h1>
-          <p className="text-sm text-gray-500 mt-0.5">Step 2 / 2</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Step 2 / 2</p>
         </div>
         {errorMessage && (
-          <p className="text-sm text-red-600" role="alert">
+          <p className="text-sm text-red-600 dark:text-red-400" role="alert">
             {errorMessage}
           </p>
         )}
@@ -206,30 +206,30 @@ export default function SpotDetailsPage() {
         {/* 住所*/}
         {address && (
           <div>
-            <p className="block text-sm font-medium text-gray-600 mb-1">
+            <p className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
               登録場所
             </p>
-            <p className="text-sm text-gray-700">{address}</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">{address}</p>
           </div>
         )}
 
         {/* スポット名（フル幅、下線スタイル） */}
         <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            スポット名 <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+            スポット名 <span className="text-red-500 dark:text-red-400">*</span>
           </label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="店舗名"
-            className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-1.5 text-gray-800 focus:ring-2 focus:ring-indigo-400 transition"
+            className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-indigo-400 transition"
             required
           />
         </div>
         {/* ジャンル + 混雑度*/}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
               ジャンル
             </label>
             <select
@@ -237,7 +237,7 @@ export default function SpotDetailsPage() {
               onChange={(e) =>
                 setGenre(e.target.value as 'CAFE' | 'COWORKING' | 'OTHER')
               }
-              className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 focus:ring-2 focus:ring-indigo-400 transition"
+              className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-400 transition"
             >
               <option value="CAFE">カフェ</option>
               <option value="COWORKING">コワーキングスペース</option>
@@ -247,7 +247,7 @@ export default function SpotDetailsPage() {
 
           <div>
             {/* 混雑度 */}
-            <label className="block text-sm font-medium text-gray-600 mb-1">
+            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
               混雑度
             </label>
             <select
@@ -255,7 +255,7 @@ export default function SpotDetailsPage() {
               onChange={(e) =>
                 setCrowdLevel(e.target.value as 'LOW' | 'MID' | 'HIGH')
               }
-              className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 focus:ring-2 focus:ring-indigo-400 transition"
+              className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-400 transition"
             >
               <option value="LOW">空いている</option>
               <option value="MID">普通</option>
@@ -266,23 +266,23 @@ export default function SpotDetailsPage() {
 
         {/* 営業時間 */}
         <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
             営業時間{' '}
-            <span className="text-xs text-gray-400 font-normal">（任意）</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500 font-normal">（任意）</span>
           </label>
           <input
             value={openingHours}
             onChange={(e) => setOpeningHours(e.target.value)}
             placeholder="営業時間"
             maxLength={100}
-            className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-1.5 text-gray-800 focus:ring-2 focus:ring-indigo-400 transition"
+            className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-1.5 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-indigo-400 transition"
           />
         </div>
 
         {/* 説明 */}
         <div>
-          <label className="block text-sm font-medium text-gray-600 mb-1">
-            説明 <span className="text-xs text-gray-400 font-normal">（任意）</span>
+          <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+            説明 <span className="text-xs text-gray-400 dark:text-gray-500 font-normal">（任意）</span>
           </label>
           <textarea
             value={description}
@@ -290,22 +290,22 @@ export default function SpotDetailsPage() {
             placeholder="作業に向いているポイントや混雑時間など"
             maxLength={300}
             rows={4}
-            className="w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-gray-800 focus:ring-2 focus:ring-indigo-400 transition"
+            className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-indigo-400 transition"
           />
-          <p className="mt-1 text-xs text-gray-400 text-right">
+          <p className="mt-1 text-xs text-gray-400 dark:text-gray-500 text-right">
             {description.length}/300
           </p>
         </div>
 
         {/* 設備情報 */}
-        <div className="border-t pt-4">
-          <h2 className="text-xl font-semibold mb-3 text-gray-900">設備</h2>
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-gray-100">設備</h2>
           <div className="flex flex-wrap gap-2">
             <label
               className={`inline-flex items-center cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 hasWifi
-                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               <input
@@ -319,8 +319,8 @@ export default function SpotDetailsPage() {
             <label
               className={`inline-flex items-center cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 hasPower
-                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               <input
@@ -334,8 +334,8 @@ export default function SpotDetailsPage() {
             <label
               className={`inline-flex items-center cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 hasQuietSpace
-                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               <input
@@ -349,8 +349,8 @@ export default function SpotDetailsPage() {
             <label
               className={`inline-flex items-center cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 hasLargeTable
-                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               <input
@@ -364,8 +364,8 @@ export default function SpotDetailsPage() {
             <label
               className={`inline-flex items-center cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 hasPhoneCallOK
-                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               <input
@@ -379,8 +379,8 @@ export default function SpotDetailsPage() {
             <label
               className={`inline-flex items-center cursor-pointer px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 hasMeetingSpace
-                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800'
+                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
               }`}
             >
               <input
@@ -394,10 +394,10 @@ export default function SpotDetailsPage() {
           </div>
         </div>
 
-        <div className="border-t pt-4">
-          <h2 className="text-xl font-semibold mb-3 text-gray-900">画像</h2>
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-gray-100">画像</h2>
           <label className="block cursor-pointer">
-            <div className="w-full min-h-[160px] border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center overflow-hidden hover:border-gray-300 hover:bg-gray-50 transition-all p-6">
+            <div className="w-full min-h-[160px] border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-2xl flex items-center justify-center overflow-hidden hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all p-6">
               {imageItems.length > 0 ? (
                 <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-3">
                   {imageItems.map((item, index) => (

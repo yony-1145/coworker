@@ -91,7 +91,7 @@ export default function Popup({
     >
       <Link
         href={href}
-        className="flex flex-col items-center bg-white text-gray-800 rounded-xl shadow-lg p-3 border border-gray-100 cursor-pointer hover:bg-gray-50 transition"
+        className="flex flex-col items-center bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 rounded-xl shadow-lg p-3 border border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition"
       >
         <Image
           src={image}
@@ -104,7 +104,7 @@ export default function Popup({
         <p className="text-sm text-center font-medium">
           <span className="font-semibold">{name ?? type}</span>
           {shownMessage && (
-            <span className="block text-xs mt-1">{shownMessage}</span>
+            <span className="block text-xs mt-1 text-gray-600 dark:text-gray-300">{shownMessage}</span>
           )}
         </p>
         {equipment.length > 0 && (
@@ -112,7 +112,7 @@ export default function Popup({
             {equipment.map((label) => (
               <span
                 key={label}
-                className="bg-gray-100 text-gray-700 text-[10px] px-2 py-0.5 rounded-full font-medium border border-gray-200"
+                className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-[10px] px-2 py-0.5 rounded-full font-medium border border-gray-200 dark:border-gray-700"
               >
                 {label}
               </span>

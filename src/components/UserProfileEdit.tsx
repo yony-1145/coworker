@@ -61,12 +61,12 @@ export default function UserProfileEditClient({ id }: { id: string }) {
   }, [id]);
 
   if (loading) {
-    return <p className="text-center mt-20 text-gray-500">読み込み中...</p>;
+    return <p className="text-center mt-20 text-gray-500 dark:text-gray-400">読み込み中...</p>;
   }
 
   if (!user) {
     return (
-      <p className="text-center mt-20 text-gray-500">
+      <p className="text-center mt-20 text-gray-500 dark:text-gray-400">
         ユーザーが見つかりません。
       </p>
     );
@@ -76,10 +76,10 @@ export default function UserProfileEditClient({ id }: { id: string }) {
   const initialProfile = user.profile ?? {};
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12">
-      <div className="max-w-2xl mx-auto bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-10 border border-gray-100 space-y-8">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+      <div className="max-w-2xl mx-auto bg-white dark:bg-gray-900 rounded-3xl shadow-lg p-10 border border-gray-200 dark:border-gray-700 space-y-8">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-semibold text-gray-900">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
             プロフィールを編集
           </h1>
           <button

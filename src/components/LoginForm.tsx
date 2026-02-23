@@ -32,21 +32,21 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-lg bg-white p-6 shadow-md"
+        className="w-full max-w-sm rounded-lg bg-white dark:bg-gray-900 p-6 shadow-md border border-gray-200 dark:border-gray-700"
       >
-        <h1 className="mb-6 text-center text-2xl font-semibold">ログイン</h1>
+        <h1 className="mb-6 text-center text-2xl font-semibold text-gray-900 dark:text-gray-100">ログイン</h1>
 
         {searchParams.get('next') && (
-          <p className="mb-4 text-sm text-red-600 text-center">
+          <p className="mb-4 text-sm text-red-600 dark:text-red-400 text-center">
             続行するにはログインが必要です
           </p>
         )}
 
         {error && (
-          <p className="mb-4 text-sm text-red-600 text-center">{error}</p>
+          <p className="mb-4 text-sm text-red-600 dark:text-red-400 text-center">{error}</p>
         )}
 
         <input
@@ -55,7 +55,7 @@ export default function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="メールアドレス"
           required
-          className="mb-3 w-full border px-3 py-2 rounded"
+          className="mb-3 w-full border border-gray-200 dark:border-gray-700 px-3 py-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         />
 
         <input
@@ -64,15 +64,15 @@ export default function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="パスワード"
           required
-          className="mb-4 w-full border px-3 py-2 rounded"
+          className="mb-4 w-full border border-gray-200 dark:border-gray-700 px-3 py-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         />
 
-        <button className="w-full bg-indigo-600 text-white py-2 rounded">
+        <button className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700">
           ログイン
         </button>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
-          <Link href="/signup" className="text-indigo-600 hover:underline">
+        <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-300">
+          <Link href="/signup" className="text-indigo-600 dark:text-indigo-400 hover:underline">
             ユーザー登録はこちらから
           </Link>
         </p>

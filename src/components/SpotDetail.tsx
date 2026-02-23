@@ -90,25 +90,25 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
   ].filter(Boolean) as string[];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-12">
-      <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg p-8 md:p-10 border border-gray-100 space-y-8">
+    <main className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12">
+      <div className="max-w-3xl mx-auto bg-white dark:bg-gray-900 rounded-3xl shadow-lg p-8 md:p-10 border border-gray-200 dark:border-gray-700 space-y-8">
         <header className="space-y-2">
-          <h1 className="text-2xl font-semibold text-gray-900">{title}</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{title}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             投稿者：
             <Link
               href={`/users/${user.id}`}
-              className="text-blue-600 hover:underline"
+              className="text-blue-600 dark:text-blue-400 hover:underline"
             >
               {user.name}
             </Link>
-            <span className="ml-2 text-gray-400 text-xs">
+            <span className="ml-2 text-gray-400 dark:text-gray-500 text-xs">
               （{new Date(createdAt).toLocaleDateString()} 投稿）
             </span>
           </p>
         </header>
 
-        <section className="border-t pt-4">
+        <section className="border-t border-gray-200 dark:border-gray-700 pt-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {displayUrls.map((url, i) => (
               <Image
@@ -126,28 +126,28 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
 
         {address && (
           <section className="space-y-1">
-            <p className="block text-sm font-medium text-gray-600">登録場所</p>
-            <p className="text-sm text-gray-700">{address}</p>
+            <p className="block text-sm font-medium text-gray-600 dark:text-gray-400">登録場所</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">{address}</p>
           </section>
         )}
 
         <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {genre != null && (
             <div>
-              <p className="block text-sm font-medium text-gray-600 mb-1">
+              <p className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                 ジャンル
               </p>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
                 {GENRE_LABEL[genre] ?? genre}
               </p>
             </div>
           )}
           {crowdLevel != null && (
             <div>
-              <p className="block text-sm font-medium text-gray-600 mb-1">
+              <p className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
                 混雑度
               </p>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
                 {CROWD_LABEL[crowdLevel] ?? crowdLevel}
               </p>
             </div>
@@ -156,41 +156,41 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
 
         {openingHours != null && openingHours !== '' && (
           <section className="space-y-1">
-            <p className="block text-sm font-medium text-gray-600">営業時間</p>
-            <p className="text-sm text-gray-700">{openingHours}</p>
+            <p className="block text-sm font-medium text-gray-600 dark:text-gray-400">営業時間</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">{openingHours}</p>
           </section>
         )}
 
-        <section className="border-t pt-4">
-          <h2 className="text-xl font-semibold mb-3 text-gray-900">設備</h2>
+        <section className="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-gray-100">設備</h2>
         {equipment.length > 0 ? (
           <div className="flex flex-wrap gap-2">
             {equipment.map((label) => (
               <span
                 key={label}
-                className="bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full font-medium border border-gray-200"
+                className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs px-3 py-1 rounded-full font-medium border border-gray-200 dark:border-gray-700"
               >
                 {label}
               </span>
             ))}
           </div>
         ) : (
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             設備情報が登録されていません。
           </p>
         )}
         </section>
 
-        <section className="border-t pt-4 space-y-3">
-          <h2 className="text-xl font-semibold text-gray-900">説明</h2>
-          <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line break-words">
+        <section className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-3">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">説明</h2>
+          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line break-words">
             {hasDescription ? description : '説明はまだ登録されていません。'}
           </p>
         </section>
 
-        <section className="border-t pt-4 space-y-3">
-          <h2 className="text-xl font-semibold text-gray-900">地図</h2>
-          <div className="h-60 rounded-xl overflow-hidden border border-gray-100">
+        <section className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-3">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">地図</h2>
+          <div className="h-60 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
             <Map
               initialViewState={{ latitude, longitude, zoom: 15 }}
               style={{ width: '100%', height: '100%' }}
@@ -201,9 +201,9 @@ export default function SpotDetail({ spot }: SpotDetailProps) {
           </div>
         </section>
 
-        <section className="border-t pt-4 space-y-3">
-          <h2 className="text-xl font-semibold text-gray-900">コメント</h2>
-          <p className="text-sm text-gray-500">機能追加予定</p>
+        <section className="border-t border-gray-200 dark:border-gray-700 pt-4 space-y-3">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">コメント</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">機能追加予定</p>
         </section>
       </div>
     </main>
