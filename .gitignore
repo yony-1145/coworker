@@ -29,6 +29,10 @@ prisma/dev.db
 *.pem
 HANDOVER.md
 
+# markdown (README 以外は追跡しない)
+*.md
+!README.md
+
 # debug
 npm-debug.log*
 yarn-debug.log*
