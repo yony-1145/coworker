@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { Marker } from 'react-map-gl/maplibre';
-import { getDefaultSpotIconByGenre } from '@/lib/spotIcons';
+import { getDefaultSpotIconByGenre } from '@/lib/spotUtils';
 
 type BasePinProps = {
   lat: number;

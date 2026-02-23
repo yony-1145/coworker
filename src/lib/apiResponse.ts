@@ -1,22 +1,18 @@
 import { NextResponse } from 'next/server';
 
-/**
- * エラーレスポンスと成功レスポンス関数で定義
- * 仕様：
- * - 各エンドポイントで共通のレスポンス形式で返却
- */
+/** 各エンドポイントで共通のレスポンス形式を返す。 */
 
-// 成功レスポンス
+/** 成功レスポンス（status: 'success', data） */
 export function success(data: unknown, httpStatus = 200) {
   return NextResponse.json({ status: 'success', data }, { status: httpStatus });
 }
 
-// エラーレスポンス
+/** エラーレスポンス（status: 'error', message, code, 任意で errors） */
 export function error(
   message: string,
   code: number,
   httpStatus?: number,
-  errors?: Record<string, string[]>, //　キーと値のセット
+  errors?: Record<string, string[]>,
 ) {
   const status = httpStatus ?? code;
   return NextResponse.json(

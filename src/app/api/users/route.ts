@@ -1,6 +1,10 @@
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { error, success } from '@/lib/apiResponse';
+import {
+  normalizeSignupBody,
+  signupSchema,
+} from '@/lib/validation/signupValidators';
 
 /**
  * サインアップ用 API
@@ -17,16 +21,16 @@ export async function POST(req: Request) {
       return error('入力内容が不正です', 400);
     }
 
-    // 入力値の正規化・最低限のバリデーション
-    const name = typeof body?.name === 'string' ? body.name.trim() : '';
-    const email =
-      typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
-    const password = typeof body?.password === 'string' ? body.password : '';
-
-    // 入力値のバリデーション
-    if (!name || !email || !password) {
-      return error('入力内容が不正です', 400);
+    const normalized = normalizeSignupBody(body);
+    const parsed = signupSchema.safeParse(normalized);
+    if (!parsed.success) {
+      const first = Object.values(parsed.error.flatten().fieldErrors)
+        .flat()
+        .find(Boolean);
+      return error(first ?? '入力内容が不正です', 400);
     }
+
+    const { name, email, password } = parsed.data;
 
     // メールアドレス重複チェック
     const exists = await prisma.user.findUnique({ where: { email } });

@@ -1,5 +1,6 @@
 import { unstable_cache } from 'next/cache';
 import { error, success } from '@/lib/apiResponse';
+import { validateGeocodeBody } from '@/lib/validation/geocodeValidators';
 
 const NOMINATIM_FETCH_TIMEOUT_MS = 8000;
 const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org/search';
@@ -15,16 +16,11 @@ const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org/search';
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => null);
-    if (!body || typeof body !== 'object') {
-      return error('住所が未入力です。', 400);
+    const validated = validateGeocodeBody(body);
+    if (!validated.ok) {
+      return error(validated.message, 400);
     }
-    const { address } = body as { address?: unknown };
-
-    if (!address || typeof address !== 'string' || !address.trim()) {
-      return error('住所が未入力です。', 400);
-    }
-
-    const trimmed = address.trim();
+    const trimmed = validated.address;
 
     const userAgent = (process.env.GEOCODE_USER_AGENT ?? '').trim();
     if (!userAgent) {

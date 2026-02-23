@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { error, success } from '@/lib/apiResponse';
+import { parseLatLngToE5 } from '@/lib/spotUtils';
 
 /**
  * スポット重複チェック API
@@ -10,14 +11,14 @@ import { error, success } from '@/lib/apiResponse';
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const lat = parseFloat(searchParams.get('lat') || '0');
-    const lng = parseFloat(searchParams.get('lng') || '0');
-    if (Number.isNaN(lat) || Number.isNaN(lng)) {
+    const parsed = parseLatLngToE5(
+      searchParams.get('lat'),
+      searchParams.get('lng'),
+    );
+    if (!parsed.ok) {
       return error('緯度経度が不正です。', 400);
     }
-
-    const latE5 = Math.round(lat * 1e5);
-    const lngE5 = Math.round(lng * 1e5);
+    const { latE5, lngE5 } = parsed;
 
     // E5一致で重複チェック
     const existing = await prisma.spot.findFirst({

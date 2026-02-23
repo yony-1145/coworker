@@ -2,11 +2,7 @@ import { getServerSession, type AuthOptions } from 'next-auth';
 import { supabaseServer } from '@/lib/supabase/server';
 import { authOptions } from '@/lib/authOptions';
 import { error, success } from '@/lib/apiResponse';
-
-function getExtension(filename: string) {
-  const parts = filename.split('.');
-  return parts.length > 1 ? parts[parts.length - 1].toLowerCase() : 'png';
-}
+import { validateUploadInput } from '@/lib/validation/uploadValidators';
 
 /**
  * 画像アップロード API
@@ -25,36 +21,18 @@ export async function POST(req: Request) {
       return error('ログインしてください', 401);
     }
 
-    // リクエストからファイル・種別を取得
     const formData = await req.formData();
-    const file = formData.get('file');
+    const fileEntry = formData.get('file');
     const typeRaw = formData.get('type');
 
-    // ファイル必須
-    if (!(file instanceof File)) {
-      return error('ファイルを選択してください', 400);
+    const validated = validateUploadInput(fileEntry, typeRaw);
+    if (!validated.ok) {
+      return error(validated.message, 400);
     }
 
-    // type: "spot" | "user" のみ許可
-    const type = typeof typeRaw === 'string' ? typeRaw : 'spot';
-    if (type !== 'spot' && type !== 'user') {
-      return error('type は "spot" または "user" を指定してください', 400);
-    }
-
-    // 画像のみ許可
-    if (!file.type.startsWith('image/')) {
-      return error('画像ファイルのみアップロードできます', 400);
-    }
-
-    // サイズ上限 5MB
-    if (file.size > 5 * 1024 * 1024) {
-      return error('ファイルサイズは5MB以内にしてください', 400);
-    }
-
-    // 保存先バケット・ディレクトリを type で決定（重複回避のため userId_タイムスタンプ.拡張子）
+    const { type, ext, file } = validated;
     const bucket = type === 'user' ? 'user-icons' : 'spot-images';
     const dir = type === 'user' ? 'users' : 'spots';
-    const ext = getExtension(file.name);
     const filePath = `${dir}/${userId}_${Date.now()}.${ext}`;
 
     // Supabase Storage へアップロード

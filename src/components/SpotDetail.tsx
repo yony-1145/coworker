@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { Map, Marker } from 'react-map-gl/maplibre';
 import Link from 'next/link';
-import { getDefaultSpotIconByGenre } from '@/lib/spotIcons';
+import { getDefaultSpotIconByGenre } from '@/lib/spotUtils';
 
 const GENRE_LABEL: Record<string, string> = {
   CAFE: 'カフェ',

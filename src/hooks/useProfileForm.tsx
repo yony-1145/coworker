@@ -1,6 +1,6 @@
 import { useState, ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { userProfileSchema } from '@/lib/validation/userProfileValidators';
+import { getProfileFormValidationErrors } from '@/lib/validation/userProfileValidators';
 
 export type UserProfileForm = {
   iconUrl?: string | null;
@@ -37,34 +37,8 @@ export const useProfileForm = (
   );
   const router = useRouter();
 
-  // name + profile を userProfileSchema で検証し、エラーをフォーム用の形で返す
-  const getValidationErrors = (
-    p: UserProfileForm,
-    userName: string,
-  ): Record<string, string | string[]> => {
-    const payload = {
-      name: userName ?? '',
-      iconUrl: p?.iconUrl ?? null,
-      headline: p?.headline ?? null,
-      occupation: p?.occupation ?? null,
-      affiliation: p?.affiliation ?? null,
-      bioText: p?.bioText ?? null,
-      links: p?.links ?? [],
-      tags: p?.tags ?? [],
-    };
-    const result = userProfileSchema.safeParse(payload);
-    if (result.success) return {};
-    const fieldErrors = result.error.flatten().fieldErrors;
-    const newErrors: Record<string, string | string[]> = {};
-    for (const [k, v] of Object.entries(fieldErrors)) {
-      if (!v?.length) continue;
-      newErrors[k] = k === 'links' ? v : v[0];
-    }
-    return newErrors;
-  };
-
   const validateAll = (p: UserProfileForm, userName: string) => {
-    const newErrors = getValidationErrors(p, userName);
+    const newErrors = getProfileFormValidationErrors(p, userName);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -74,28 +48,28 @@ export const useProfileForm = (
    */
   const handleNameChange = (value: string) => {
     setName(value);
-    setErrors(getValidationErrors(profile, value));
+    setErrors(getProfileFormValidationErrors(profile, value));
   };
 
   //単項目の変更＋即時バリデーション
   const handleChange = (field: string, value: string) => {
     const nextProfile = { ...profile, [field]: value };
     setProfile(nextProfile);
-    setErrors(getValidationErrors(nextProfile, name));
+    setErrors(getProfileFormValidationErrors(nextProfile, name));
   };
 
   // SNSリンク配列の更新＋バリデーション
   const handleLinkChange = (links: string[]) => {
     const nextProfile = { ...profile, links };
     setProfile(nextProfile);
-    setErrors(getValidationErrors(nextProfile, name));
+    setErrors(getProfileFormValidationErrors(nextProfile, name));
   };
 
   // タグ配列の更新＋バリデーション
   const handleTagChange = (tags: string[]) => {
     const nextProfile = { ...profile, tags };
     setProfile(nextProfile);
-    setErrors(getValidationErrors(nextProfile, name));
+    setErrors(getProfileFormValidationErrors(nextProfile, name));
   };
 
   /**

@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Popup as MapPopup } from 'react-map-gl/maplibre';
-import { getDefaultSpotIconByGenre } from '@/lib/spotIcons';
+import { getDefaultSpotIconByGenre } from '@/lib/spotUtils';
 
 type PopupProps = {
   type: 'user' | 'spot';

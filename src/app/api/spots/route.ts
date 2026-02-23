@@ -1,41 +1,16 @@
 import { prisma } from '@/lib/prisma';
-import { z } from 'zod';
 import { getServerSession } from 'next-auth/next';
 import type { AuthOptions } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { error, success } from '@/lib/apiResponse';
-import { getDefaultSpotIconByGenre } from '@/lib/spotIcons';
-import { normalizeTags } from '@/lib/spotUtils';
-
-/**
- * スポット投稿（POST）用の入力スキーマ
- * - API側でも型・必須項目・制約を保証するためにZodを使用
- */
-const SpotPostSchema = z.object({
-  title: z.string().trim().min(1).max(80),
-  description: z.string().trim().max(2000).optional().nullable(),
-  latitude: z.coerce.number().min(-90).max(90),
-  longitude: z.coerce.number().min(-180).max(180),
-  address: z.string().trim().max(255).optional().nullable(),
-  openingHours: z.string().trim().max(100).optional().nullable(),
-  genre: z.enum(['CAFE', 'COWORKING', 'OTHER']).optional(),
-  hasWifi: z.boolean().optional(),
-  hasPower: z.boolean().optional(),
-  hasQuietSpace: z.boolean().optional(),
-  hasLargeTable: z.boolean().optional(),
-  hasPhoneCallOK: z.boolean().optional(),
-  hasMeetingSpace: z.boolean().optional(),
-  crowdLevel: z.enum(['LOW', 'MID', 'HIGH']).optional(),
-  imageUrls: z.array(z.string().url()).optional().nullable(),
-  tags: z.array(z.string()).optional().nullable(),
-}); // Todo:修正予定、別ファイルに移動
+import { getDefaultSpotIconByGenre, normalizeTags } from '@/lib/spotUtils';
+import { spotPostSchema } from '@/lib/validation/spotValidators';
 
 /**
  * スポット一覧取得 API
  *
  * 仕様：
  * - スポット一覧を取得
- * - 検索クエリ（q）対応
  */
 export async function GET(req: Request) {
   try {
@@ -45,10 +20,7 @@ export async function GET(req: Request) {
     const spots = await prisma.spot.findMany({
       where: q
         ? {
-            OR: [
-              { title: { contains: q } },
-              { description: { contains: q } },
-            ],
+            OR: [{ title: { contains: q } }, { description: { contains: q } }],
           }
         : undefined,
       include: {
@@ -87,7 +59,7 @@ export async function POST(req: Request) {
     }
 
     // リクエストボディ検証
-    const parsed = SpotPostSchema.safeParse(body);
+    const parsed = spotPostSchema.safeParse(body);
     if (!parsed.success) {
       const flattened = parsed.error.flatten();
       return error(
