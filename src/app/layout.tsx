@@ -21,10 +21,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja" suppressHydrationWarning>
-      <head>
-        <ThemeScript />
-      </head>
       <body>
+        <ThemeScript />
         <ThemeProvider>
           <NextAuthProvider>
             <div className="flex min-h-screen">

@@ -99,6 +99,39 @@ html.dark .hover\:bg-gray-100:hover,
   background-color: rgb(55 65 81);
 }
 
+/* 不透明度付き背景・グラデーション・アクセント（トップ・カード・フィルター用） */
+html.dark .bg-white\/80,
+.dark .bg-white\/80,
+html.dark .bg-white\/90,
+.dark .bg-white\/90 {
+  background-color: rgba(31, 41, 55, 0.9);
+}
+/* グラデーション背景（トップページの min-h-screen など）をダークに */
+html.dark .bg-gradient-to-b.from-gray-50.to-gray-100,
+.dark .bg-gradient-to-b.from-gray-50.to-gray-100 {
+  background-image: linear-gradient(to bottom, rgb(17 24 39), rgb(31 41 55));
+}
+html.dark .bg-indigo-50,
+.dark .bg-indigo-50 {
+  background-color: rgb(49 46 129);
+}
+html.dark .text-indigo-600,
+.dark .text-indigo-600 {
+  color: rgb(165 180 252);
+}
+html.dark .bg-blue-100,
+.dark .bg-blue-100 {
+  background-color: rgb(30 58 138);
+}
+html.dark .text-blue-700,
+.dark .text-blue-700 {
+  color: rgb(191 219 254);
+}
+html.dark .hover\:bg-blue-200:hover,
+.dark .hover\:bg-blue-200:hover {
+  background-color: rgb(37 99 235);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
