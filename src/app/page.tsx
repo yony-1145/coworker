@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 const features = [
   {
@@ -36,7 +37,7 @@ export default function WelcomePage() {
           <div className="grid gap-10 md:grid-cols-2 md:items-center">
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <img
+                <Image
                   src="/coworker.jpg"
                   alt="Coworker"
                   className="h-8 w-8 rounded-md object-cover"
@@ -68,7 +69,7 @@ export default function WelcomePage() {
               </div>
             </div>
             <div className="rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 shadow-sm flex items-center justify-center min-h-64 max-h-96">
-              <img
+              <Image
                 src="/welcome/map.png"
                 alt="地図でスポットを探す画面"
                 className="w-full h-full object-contain"
@@ -137,19 +138,12 @@ export default function WelcomePage() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 shadow-sm h-64 md:h-72">
-              <div className="row-span-2 h-full min-h-0">
-                <img
-                  src="/welcome/nav.png"
-                  alt="ナビゲーション"
-                  className="w-full h-full object-cover object-left"
-                />
-              </div>
-              <img
-                src="/welcome/spot.png"
-                alt="スポット詳細"
-                className="w-full h-full object-cover object-top"
+              <Image
+                src="/welcome/nav.png"
+                alt="ナビゲーション"
+                className="w-full h-full object-cover object-left"
               />
-              <img
+              <Image
                 src="/welcome/profile.png"
                 alt="プロフィール"
                 className="w-full h-full object-cover object-top"
