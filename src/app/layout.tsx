@@ -15,6 +15,11 @@ export const metadata: Metadata = {
   description: siteDescription,
   applicationName: 'Coworker',
   keywords: ['Coworker', '作業場所', 'カフェ', 'コワーキング', '地図アプリ'],
+  icons: {
+    icon: [
+      { url: '/coworker.jpg', type: 'image/jpeg', sizes: '512x512' },
+    ],
+  },
   openGraph: {
     type: 'website',
     title: 'Coworker',
@@ -56,6 +61,7 @@ export default function RootLayout({
   return (
     <html lang="ja" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/coworker.jpg" type="image/jpeg" sizes="512x512" />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body>
