@@ -4,11 +4,34 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { NextAuthProvider } from '@/lib/NextAuthProvider';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
+const siteDescription =
+  '作業に最適な場所をもっと簡単に見つけよう。Coworkerは「みんなで作る」作業場所を見つけるための地図アプリです。';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
+  ),
   title: 'Coworker',
-  description: 'MVP版',
-  icons: {
-    icon: '/coworker.jpg',
+  description: siteDescription,
+  applicationName: 'Coworker',
+  keywords: ['Coworker', '作業場所', 'カフェ', 'コワーキング', '地図アプリ'],
+  openGraph: {
+    type: 'website',
+    title: 'Coworker',
+    description: siteDescription,
+    siteName: 'Coworker',
+    images: [
+      { url: '/coworker.jpg', width: 512, height: 512, alt: 'Coworker' },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Coworker',
+    description: siteDescription,
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

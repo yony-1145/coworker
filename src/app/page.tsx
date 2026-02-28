@@ -137,17 +137,25 @@ export default function WelcomePage() {
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 shadow-sm h-64 md:h-72">
-              <Image
-                src="/welcome/nav.png"
-                alt="ナビゲーション"
-                className="w-full h-full object-cover object-left"
-              />
-              <Image
-                src="/welcome/profile.png"
-                alt="プロフィール"
-                className="w-full h-full object-cover object-top"
-              />
+            <div className="grid grid-cols-2 gap-2 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 shadow-sm min-h-64">
+              <div className="relative w-full aspect-[3/4] min-h-48">
+                <Image
+                  src="/welcome/profile.png"
+                  alt="プロフィール"
+                  className="object-contain object-top"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 320px"
+                />
+              </div>
+              <div className="relative w-full aspect-[3/4] min-h-48">
+                <Image
+                  src="/welcome/spot.png"
+                  alt="スポット"
+                  className="object-contain object-top"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 320px"
+                />
+              </div>
             </div>
           </div>
         </section>
