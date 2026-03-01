@@ -153,7 +153,7 @@ export default function PostNew() {
             住所または地名
           </label>
 
-          <div className="flex space-x-2">
+          <div className="flex gap-2 min-w-0">
             <input
               value={address}
               onChange={(e) => {
@@ -162,7 +162,7 @@ export default function PostNew() {
                 setFormError(null);
               }}
               placeholder="場所や店名"
-              className="flex-1 border rounded-lg px-3 py-2"
+              className="min-w-0 flex-1 border rounded-lg px-3 py-2"
               disabled={isSearching}
             />
             <button
