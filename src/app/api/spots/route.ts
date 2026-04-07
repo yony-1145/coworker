@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { getServerSession } from 'next-auth/next';
@@ -39,6 +40,10 @@ const SpotPostSchema = z.object({
  */
 export async function GET(req: Request) {
   try {
+    if (!process.env.DATABASE_URL?.trim()) {
+      return success({ spots: [] });
+    }
+
     const { searchParams } = new URL(req.url);
     const q = (searchParams.get('q') || '').trim();
 
@@ -61,6 +66,16 @@ export async function GET(req: Request) {
     return success({ spots });
   } catch (err: unknown) {
     console.error('api/spots GET failed', err);
+    if (
+      err instanceof Prisma.PrismaClientInitializationError ||
+      (err instanceof Prisma.PrismaClientKnownRequestError &&
+        ['P1000', 'P1001', 'P1017'].includes(err.code))
+    ) {
+      return error(
+        'データベースに接続できません。DATABASE_URL と DB の起動状態を確認してください。',
+        503,
+      );
+    }
     return error('サーバーエラーが発生しました', 500);
   }
 }

@@ -67,6 +67,12 @@ export default function MapPage() {
             res.status,
             body?.message ?? res.statusText,
           );
+          const msg =
+            typeof body?.message === 'string' && body.message.trim()
+              ? body.message
+              : 'スポットの読み込みに失敗しました。';
+          setLoadError(msg);
+        } else {
           setLoadError('スポットの読み込みに失敗しました。');
         }
       } catch (err) {
