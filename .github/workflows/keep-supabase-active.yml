@@ -18,15 +18,22 @@ jobs:
         SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
         SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
       run: |
-  echo "Pinging Supabase at $(date '+%Y-%m-%d %H:%M:%S UTC')"
-  
-  if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-    echo "❌ エラー: シークレットが見つかりません"
-    exit 1
-  fi
-  
-  HTTP_STATUS=$(curl -s -i \
-    "${SUPABASE_URL}/rest/v1/" \
-    -H "apikey: ${SUPABASE_ANON_KEY}" | head -n 1)
-  
-  echo "Response: ${HTTP_STATUS}"
+        echo "Pinging Supabase at $(date '+%Y-%m-%d %H:%M:%S UTC')"
+
+        if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+          echo "❌ エラー: シークレットが見つかりません"
+          exit 1
+        fi
+
+        HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+          "${SUPABASE_URL}/rest/v1/" \
+          -H "apikey: ${SUPABASE_ANON_KEY}")
+
+        echo "HTTP Status: ${HTTP_STATUS}"
+
+        if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+          echo "✅ Supabase is active and responding."
+        else
+          echo "❌ Unexpected response: ${HTTP_STATUS}"
+          exit 1
+        fi
